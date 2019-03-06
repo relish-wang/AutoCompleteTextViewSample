@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/item_choose"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <wang.relish.textsample.ui.widget.AccountSwipeLayout
+        android:id="@+id/sll"
+        android:layout_width="match_parent"
+        android:background="@color/white"
+        android:layout_marginRight="16dp"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:id="@+id/rl_item"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tv_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginTop="12dp"
+                android:textColor="#666666"
+                android:textSize="16sp"
+                tools:text="王小明" />
+
+            <!-- 高亮字体颜色: #3947E6 -->
+            <TextView
+                android:id="@+id/tv_phone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_name"
+                android:layout_marginBottom="8dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginTop="8dp"
+                android:textColor="#666666"
+                android:textSize="16sp"
+                tools:text="13212341234" />
+
+            <ImageView
+                android:id="@+id/iv_delete"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:padding="10dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_clear" />
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/tv_delete"
+            android:layout_width="82dp"
+            android:layout_height="match_parent"
+            android:background="#ff0000"
+            android:gravity="center"
+            android:listSelector="#000000"
+            android:text="确定删除"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+    </wang.relish.textsample.ui.widget.AccountSwipeLayout>
+
+    <View
+        android:id="@+id/bottom_line"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:background="#D8D8D8" />
+</LinearLayout>

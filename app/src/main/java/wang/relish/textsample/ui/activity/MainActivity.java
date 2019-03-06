@@ -1,10 +1,10 @@
-package wang.relish.textsample;
+package wang.relish.textsample.ui.activity;
 
 import android.os.Bundle;
 
-import androidx.appcompat.app.AppCompatActivity;
+import wang.relish.textsample.R;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

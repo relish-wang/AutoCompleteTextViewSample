@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="dp_16">16dp</dimen>
+    <dimen name="fc_padding_10">10dp</dimen>
+    <dimen name="login_text_size">16sp</dimen>
+</resources>

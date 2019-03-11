@@ -15,7 +15,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         AutoCompleteTextView autoView = findViewById(R.id.actv);
-        autoView.setCompletionHint();
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.names, android.R.layout.simple_list_item_1);
         autoView.setAdapter(adapter);
     }

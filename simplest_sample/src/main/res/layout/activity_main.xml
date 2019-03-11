@@ -9,7 +9,7 @@
         android:id="@+id/actv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:completionHint="候选名字列表"
+        android:completionHint=""
         android:completionThreshold="1"
         android:dropDownWidth="match_parent"
         android:dropDownHeight="wrap_content"

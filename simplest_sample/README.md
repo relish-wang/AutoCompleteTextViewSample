@@ -1,7 +1,9 @@
 # AutoCompleteTextView最简例子
 
 笔者试图通过介绍一个AutoCompleteTextView的最简例子，来让读者直观地感受到这个控件实际展现效果，且较为容易地掌握它的使用方法。
+
 以下是效果展示:
+
 ![最简例子效果展示](./art/simplest_sample.gif)
 
 ### 一、关键代码拆解

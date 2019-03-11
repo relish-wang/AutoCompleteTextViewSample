@@ -9,4 +9,14 @@ AutoCompleteTextView是一个可编辑的文本视图，可在用户键入时自
 
 ![继承树](./art/autocompletetextview_extends_tree.png)
 
-### 二、AutoCompleteTextView基本使用
+### 二、AutoCompleteTextView的基本使用
+AutoCompleteTextView常用属性
+
+|属性|描述|
+|:-|:-|
+|android:completionHint|设置出现在下拉菜单底部的提示信息|
+|android:completionThreshold|设置触发补全提示信息的字符个数。最小值为1，设置的数值小于1时则置为1。|
+|android:dropDownHorizontalOffset|设置下拉菜单于文本框之间的水平偏移量|
+|android:dropDownHeight|设置下拉菜单的高度|
+|android:dropDownWidth|设置下拉菜单的宽度|
+|android:dropDownVerticalOffset|设置下拉菜单于文本框之间的垂直偏移量|

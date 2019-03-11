@@ -2,12 +2,12 @@ package wang.relish.textsample.ui.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.reflect.TypeToken;
 
@@ -19,13 +19,16 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.ObservableSource;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 import wang.relish.textsample.R;
 import wang.relish.textsample.adapter.AccountAdapter;
 import wang.relish.textsample.adapter.ObserverAdapter;
 import wang.relish.textsample.adapter.OnItemClickListener;
 import wang.relish.textsample.model.User;
 import wang.relish.textsample.model.UserResponse;
-import wang.relish.textsample.ui.dialog.LoadingDialog;
 import wang.relish.textsample.ui.widget.SCAutoCompleteTextView;
 import wang.relish.textsample.util.SPUtil;
 import wang.relish.textsample.util.SingleInstanceUtils;
@@ -128,45 +131,41 @@ public class LoginActivity extends BaseActivity implements OnItemClickListener {
             showToast("请输入密码");
             return;
         }
+
+        // 将已登录的账号存起来
         Observable.create((ObservableOnSubscribe<User>) emitter -> {
-            SystemClock.sleep(1000);
-            if (phone.matches("^1351111222\\d$") && password.matches("^123456$")) {
-                // TODO 查询数据库是否存在这样的数据
-                final UserResponse login = UserUtil.login(phone, password);
-                if(login.isSuccess()) {
-                    emitter.onNext(login.getUser());
-                }else{
-                    emitter.onError(new Exception(login.getMsg()));
-                }
+            //  查询数据库是否存在这样的数据
+            final UserResponse login = UserUtil.login(phone, password);
+            if (login.isSuccess()) {
+                emitter.onNext(login.getUser());
             } else {
-                emitter.onError(new Exception("账号或密码错误"));
+                emitter.onError(new Exception(login.getMsg()));
             }
             emitter.onComplete();
-        }).doOnSubscribe(disposable -> showLoading())
+        }).flatMap((Function<User, ObservableSource<Boolean>>) user ->
+                Observable.just(UserUtil.saveUserIntoHistory(user)))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe(disposable -> showLoading())
                 .doOnComplete(this::dismissLoading)
                 .doOnError(e -> showToast(e.getMessage()))
-                .subscribe(new ObserverAdapter<User>() {
+                .subscribe(new ObserverAdapter<Boolean>() {
                     @Override
-                    public void onNext(User user) {
+                    public void onNext(Boolean aBoolean) {
+                        if (!aBoolean) {
+                            Toast.makeText(LoginActivity.this, "用户数据保存失败", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         startActivity(intent);
                         finish();
-
-                        // 将已登录的账号存起来
-                        List<User> users = new ArrayList<>();
-                        final String cacheDataJson = SPUtil.getString(KEY_HISTORY_ACCOUNTS, "[]");
-                        users = SingleInstanceUtils.getGsonInstance().fromJson(cacheDataJson, new TypeToken<List<User>>() {
-                        }.getType());
-
-
                     }
                 });
     }
 
     @OnClick(R.id.tv_forget_pwd)
-    public void forgetPwd(View v){
-        // TODO
-        showLoading();
+    public void forgetPwd(View v) {
+        // TODO 忘记密码
     }
 
     @Override

@@ -4,11 +4,13 @@ import android.text.TextUtils;
 
 import com.google.gson.reflect.TypeToken;
 
+import java.util.Iterator;
 import java.util.List;
 
 import wang.relish.textsample.model.User;
 import wang.relish.textsample.model.UserResponse;
-import wang.relish.textsample.ui.activity.LoginActivity;
+
+import static wang.relish.textsample.ui.activity.LoginActivity.KEY_HISTORY_ACCOUNTS;
 
 /**
  * @author Relish Wang
@@ -16,15 +18,22 @@ import wang.relish.textsample.ui.activity.LoginActivity;
  */
 public final class UserUtil {
 
+    private static final char[] NUMS = "零一二三四五六七八九".toCharArray();
+
     /**
-     * 模拟登录的网络请求(同步)
+     * [模拟网络请求]登录
      *
      * @param phone    手机号
      * @param password 密码
      * @return 模拟的网络接口返回结果
      */
     public static UserResponse login(String phone, String password) {
-        String usersJson = SPUtil.getString(LoginActivity.KEY_HISTORY_ACCOUNTS, "[]");
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        String usersJson = SPUtil.getString(KEY_HISTORY_ACCOUNTS, "[]");
         List<User> users = SingleInstanceUtils.getGsonInstance().fromJson(usersJson, new TypeToken<List<User>>() {
         }.getType());
         for (User user : users) {
@@ -36,6 +45,53 @@ public final class UserUtil {
                 }
             }
         }
+        // 内置10个账号
+        if (phone.matches("^1351111222\\d$") && password.matches("^123456$")) {
+            return new UserResponse(new User(phone, password, "李" + NUMS[phone.charAt(phone.length() - 1) - '0']));
+        }
         return new UserResponse("用户名不存在");
+    }
+
+    /**
+     * [模拟网络请求]登录后保存信息
+     *
+     * @param user 当前登录的用户信息
+     * @return 是否保存成功
+     */
+    public static boolean saveUserIntoHistory(User user) {
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        final String cacheDataJson = SPUtil.getString(KEY_HISTORY_ACCOUNTS, "[]");
+        List<User> users = SingleInstanceUtils.getGsonInstance().fromJson(cacheDataJson, new TypeToken<List<User>>() {
+        }.getType());
+        Iterator<User> iterator = users.iterator();
+        while (iterator.hasNext()) {
+            User next = iterator.next();
+            if (TextUtils.equals(next.getPhone(), user.getPhone())) {
+                iterator.remove();
+            }
+        }
+        users.add(0, user);
+        String newUserJson = SingleInstanceUtils.getGsonInstance().toJson(users);
+        return SPUtil.putString(KEY_HISTORY_ACCOUNTS, newUserJson);
+    }
+
+    /**
+     * [模拟网络请求]获取账号信息
+     *
+     * @return 已登录的账号信息
+     */
+    public static List<User> getAllAccounts() {
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        String usersJson = SPUtil.getString(KEY_HISTORY_ACCOUNTS, "[]");
+        return SingleInstanceUtils.getGsonInstance().fromJson(usersJson, new TypeToken<List<User>>() {
+        }.getType());
     }
 }

@@ -9,11 +9,11 @@
         android:id="@+id/actv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:completionHint=""
+        android:completionHint="候选词列表"
         android:completionThreshold="1"
         android:dropDownWidth="match_parent"
         android:dropDownHeight="wrap_content"
-        android:dropDownVerticalOffset="20dp"
+        android:dropDownVerticalOffset="2dp"
         android:hint="请输入姓名" />
 
 </LinearLayout>

@@ -8,9 +8,9 @@
 
 需要手动编辑的代码在三个文件里:
 
-- MainActivity.java
-- activity_main.xml
-- arrays.xml
+- [MainActivity.java](./src/main/java/wang/relish/simplest/sample/MainActivity.java)
+- [activity_main.xml](./src/main/res/layout/activity_main.xml)
+- [arrays.xml](./src/main/res/values/arrays.xml)
 
 **核心代码**
 
@@ -54,7 +54,7 @@ ArrayAdapter中用到的**R.array.names**, 暂且按下不表。先来看一下A
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="请输入姓名"
-        android:completionHint=""
+        android:completionHint="候选词列表"
         android:completionThreshold="1"
         android:dropDownWidth="match_parent"
         android:dropDownHeight="wrap_content"

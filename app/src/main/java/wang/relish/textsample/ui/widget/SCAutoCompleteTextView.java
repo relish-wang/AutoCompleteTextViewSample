@@ -2,7 +2,6 @@ package wang.relish.textsample.ui.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.ListAdapter;
 
 import androidx.appcompat.widget.AppCompatAutoCompleteTextView;
 

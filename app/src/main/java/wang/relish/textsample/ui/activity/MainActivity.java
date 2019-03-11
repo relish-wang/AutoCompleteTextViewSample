@@ -1,8 +1,8 @@
 package wang.relish.textsample.ui.activity;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -23,9 +24,14 @@ import io.reactivex.schedulers.Schedulers;
 import wang.relish.textsample.R;
 import wang.relish.textsample.adapter.ObserverAdapter;
 import wang.relish.textsample.model.User;
-import wang.relish.textsample.util.SingleInstanceUtils;
 import wang.relish.textsample.util.UserUtil;
 
+/**
+ * 主页
+ *
+ * @author Relish Wang
+ * @since 2019/3/6
+ */
 public class MainActivity extends BaseActivity {
 
     @BindView(R.id.rv_accounts)
@@ -52,19 +58,24 @@ public class MainActivity extends BaseActivity {
             emitter.onNext(allAccounts);
             emitter.onComplete();
         })
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .doOnSubscribe(disposable -> showLoading())
-        .doOnComplete(this::dismissLoading)
-        .doOnError(e -> showToast(e.getMessage()))
-        .subscribe(new ObserverAdapter<List<User>>() {
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe(disposable -> showLoading())
+                .doOnComplete(this::dismissLoading)
+                .doOnError(e -> showToast(e.getMessage()))
+                .subscribe(new ObserverAdapter<List<User>>() {
 
-            @Override
-            public void onNext(List<User> users) {
-                mUsers = users;
-                mAdapter.notifyDataSetChanged();
-            }
-        });
+                    @Override
+                    public void onNext(List<User> users) {
+                        mUsers = users;
+                        mAdapter.notifyDataSetChanged();
+                    }
+                });
+    }
+
+    @OnClick(R.id.btn_logout)
+    public void logout(View v){
+        LoginActivity.logout(this);
     }
 
     class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {

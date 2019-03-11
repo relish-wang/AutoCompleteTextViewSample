@@ -26,6 +26,7 @@ import androidx.core.content.ContextCompat;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import wang.relish.textsample.R;
+import wang.relish.textsample.listener.OnItemClickListener;
 import wang.relish.textsample.model.User;
 import wang.relish.textsample.ui.activity.LoginActivity;
 import wang.relish.textsample.ui.widget.AccountSwipeLayout;
@@ -34,16 +35,17 @@ import wang.relish.textsample.util.SPUtil;
 import wang.relish.textsample.util.SingleInstanceUtils;
 
 /**
+ * 登录输入框的下拉候选账号列表
+ *
  * @author Relish Wang
  * @since 2018/11/27
  */
-
 public class AccountAdapter extends BaseAdapter implements SwipeLinearLayout.OnSwipeListener, Filterable {
 
-    private List<User> mAccounts = new ArrayList<>();
+    private List<User> mAccounts;
     private List<AccountSwipeLayout> mSwipeLinearLayouts = new ArrayList<>();
 
-    private List<User> mOrigin = new ArrayList<>();
+    private List<User> mOrigin;
 
     private OnItemClickListener mListener;
 
@@ -127,19 +129,16 @@ public class AccountAdapter extends BaseAdapter implements SwipeLinearLayout.OnS
                         users.add(next);
                     }
                 }
-                SPUtil.putString( LoginActivity.KEY_HISTORY_ACCOUNTS, SingleInstanceUtils.getGsonInstance().toJson(users));
+                SPUtil.putString(LoginActivity.KEY_HISTORY_ACCOUNTS, SingleInstanceUtils.getGsonInstance().toJson(users));
                 notifyDataSetChanged();
             }
         });
-        View.OnClickListener choose = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (holder.sll.isExpand()) {
-                    holder.sll.scrollAuto(SwipeLinearLayout.DIRECTION_SHRINK);
-                } else {
-                    if (mListener != null) {
-                        mListener.onItemClick(v, item);
-                    }
+        View.OnClickListener choose = v -> {
+            if (holder.sll.isExpand()) {
+                holder.sll.scrollAuto(SwipeLinearLayout.DIRECTION_SHRINK);
+            } else {
+                if (mListener != null) {
+                    mListener.onItemClick(v, item);
                 }
             }
         };
@@ -245,7 +244,7 @@ public class AccountAdapter extends BaseAdapter implements SwipeLinearLayout.OnS
         @BindView(R.id.rl_item)
         View vItem;
 
-        public ViewHolder(View item) {
+        ViewHolder(View item) {
             this.item = item;
             ButterKnife.bind(this, item);
 
@@ -258,12 +257,7 @@ public class AccountAdapter extends BaseAdapter implements SwipeLinearLayout.OnS
                         disappear = AnimationUtils.loadAnimation(swipeLayout.getContext(), R.anim.account_del_disappear);
                     }
                     ivDelete.startAnimation(disappear);
-                    ivDelete.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            ivDelete.setVisibility(View.GONE);
-                        }
-                    }, 300);
+                    ivDelete.postDelayed(() -> ivDelete.setVisibility(View.GONE), 300);
                 }
 
                 @Override
@@ -273,12 +267,7 @@ public class AccountAdapter extends BaseAdapter implements SwipeLinearLayout.OnS
                         appear = AnimationUtils.loadAnimation(swipeLayout.getContext(), R.anim.account_del_appear);
                     }
                     ivDelete.startAnimation(appear);
-                    ivDelete.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            ivDelete.setVisibility(View.VISIBLE);
-                        }
-                    }, 300);
+                    ivDelete.postDelayed(() -> ivDelete.setVisibility(View.VISIBLE), 300);
                 }
             });
             mSwipeLinearLayouts.add(sll);

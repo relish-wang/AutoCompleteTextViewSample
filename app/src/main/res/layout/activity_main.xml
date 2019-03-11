@@ -3,11 +3,24 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".ui.activity.MainActivity">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_accounts"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
+    <TextView
+        android:id="@+id/btn_logout"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/shape_corners_bg_login"
+        android:gravity="center"
+        android:text="@string/logout"
+        android:textColor="@color/white"
+        android:textSize="@dimen/login_text_size" />
 </LinearLayout>

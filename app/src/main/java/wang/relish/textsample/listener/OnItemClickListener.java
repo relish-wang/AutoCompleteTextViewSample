@@ -1,4 +1,4 @@
-package wang.relish.textsample.adapter;
+package wang.relish.textsample.listener;
 
 import android.view.View;
 

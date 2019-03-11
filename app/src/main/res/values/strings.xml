@@ -15,5 +15,6 @@
     <string name="back_end_login_ensure">xxx后台登录验证</string>
     <string name="login_pc">登录电脑版xxx</string>
     <string name="string_login">密码登录</string>
+    <string name="logout">退出登录</string>
 
 </resources>

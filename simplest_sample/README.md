@@ -1,6 +1,6 @@
 # AutoCompleteTextView最简例子
 
-笔者试图通过介绍一个AutoCompleteTextView的最简例子，来让读者直观地感受到这个控件实际展现效果，且较为容易地掌握它的使用方法。
+笔者试图通过介绍一个AutoCompleteTextView的最简例子，来让读者直观地感受到这个控件实际展现效果，也较为容易地掌握它的基本使用方法。
 
 以下是效果展示:
 
@@ -112,7 +112,7 @@ ArrayAdapter中用到的**R.array.names**, 暂且按下不表。先来看一下A
 
 #### 1 关于completionHint属性，AutoCompleteTextView是如何将它显示在候选词列表的下方的？
 
-根据查看源码可以发现，ACTV的下拉列表最晚层是一个ListPopupWindow，而设置completionHint后，其实是将提示文字显示到了一个TextView上。ListPopupWindow根布局(纵向的LinearLayout)addView了这个TextView。
+根据查看源码可以发现，ACTV的下拉列表最外层是一个ListPopupWindow，而设置completionHint后，其实是将提示文字显示到了一个TextView上。ListPopupWindow根布局(纵向的LinearLayout)addView了这个TextView。
 
   AutoCompleteTextView#setCompletionHint:
 

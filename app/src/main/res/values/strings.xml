@@ -14,5 +14,9 @@
     <string name="pwd_error_field_required" translatable="false">密码不能为空</string>
     <string name="string_login">密码登录</string>
     <string name="logout">退出登录</string>
+    <string name="string_register">用户注册</string>
+    <string name="prompt_register">注册</string>
+    <string name="register_success">注册成功!</string>
+    <string name="some_mills_later_go_login">%s秒后跳转到登录页面</string>
 
 </resources>

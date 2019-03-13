@@ -1,5 +1,4 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/ll_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -19,9 +18,9 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="120dp"
         android:orientation="horizontal">
-
+        <!--android:layout_marginTop="48dp"-->
         <wang.relish.textsample.ui.widget.SCAutoCompleteTextView
             android:id="@+id/act_account"
             android:layout_width="match_parent"
@@ -40,7 +39,7 @@
 
 
         <ImageView
-            android:id="@+id/iv_account_clear"
+            android:id="@+id/iv_text_clear"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_alignParentEnd="true"
@@ -62,37 +61,7 @@
         android:layout_marginTop="30dp"
         android:orientation="horizontal">
 
-        <EditText
-            android:id="@+id/et_pwd"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@null"
-            android:hint="@string/prompt_password"
-            android:imeOptions="actionSend"
-            android:inputType="textPassword"
-            android:maxLines="1"
-            android:padding="8dp"
-            android:textColor="@color/title_text_color"
-            android:textColorHint="@color/hint_text_color"
-            android:textSize="16sp" />
-
-        <ImageView
-            android:id="@+id/iv_pwd_clear"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_gravity="center_vertical"
-            android:padding="8dp"
-            android:src="@drawable/ic_clear"
-            android:visibility="invisible" />
-
-        <ImageView
-            android:id="@+id/iv_pwd_visibility"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_gravity="center_vertical"
-            android:padding="6dp"
-            tools:src="@drawable/ic_password_visible" />
+        <include layout="@layout/include_input_password" />
 
     </LinearLayout>
 
@@ -112,7 +81,8 @@
             android:layout_marginTop="12dp"
             android:layout_marginBottom="12dp"
             android:text="@string/prompt_sign_up"
-            android:textColor="#666" />
+            android:textColor="#666"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/tv_forget_pwd"

@@ -1,7 +1,6 @@
 package wang.relish.textsample.ui.activity;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -75,7 +74,8 @@ public class MainActivity extends BaseActivity {
 
     @OnClick(R.id.btn_logout)
     public void logout(View v){
-        LoginActivity.logout(this);
+        LoginActivity.start(this);
+        finish();
     }
 
     class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {

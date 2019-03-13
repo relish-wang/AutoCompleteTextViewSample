@@ -8,9 +8,6 @@ import android.view.ViewParent;
 import android.widget.LinearLayout;
 import android.widget.Scroller;
 
-/**
- * Created by taofangxin on 16/5/18.
- */
 public class SwipeLinearLayout extends LinearLayout {
     Scroller mScroller;
     int startScrollX;
@@ -85,7 +82,7 @@ public class SwipeLinearLayout extends LinearLayout {
             case MotionEvent.ACTION_MOVE:
                 float curX = ev.getX();
                 float curY = ev.getY();
-                if (hasJudged == false) {
+                if (!hasJudged) {
                     float dx = curX - startX;
                     float dy = curY - startY;
                     if ((dx * dx + dy * dy > MOVE_JUDGE_DISTANCE * MOVE_JUDGE_DISTANCE)) {

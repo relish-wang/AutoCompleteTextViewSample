@@ -131,39 +131,37 @@ ArrayAdapter中用到的**R.array.names**, 暂且按下不表。先来看一下A
   ListPopupWindow#setPromptView:
 
   ```java
-  public void setPromptView(@Nullable View prompt) {
-      // ...省略部分代码...
-      mPromptView = prompt;// 看到这里，就知道应该去搜索mPromptView被使用的地方
-      // ...省略部分代码...
-  }
+public void setPromptView(@Nullable View prompt) {
+    // ...省略部分代码...
+    mPromptView = prompt;// 看到这里，就知道应该去搜索mPromptView被使用的地方
+    // ...省略部分代码...
+}
   ```
 
   ListPopupWindow#buildDropDown
 
   ```java
-  private int buildDropDown() {
-      // ...省略部分代码...
-      View hintView = mPromptView;// 接上一段代码里的mPromptView
-      if (hintView != null) {
-          // 构建一个纵向的LinearLayout
-          LinearLayout hintContainer = new LinearLayout(context);
-          hintContainer.setOrientation(LinearLayout.VERTICAL);
+private int buildDropDown() {
+    // ...省略部分代码...
+    View hintView = mPromptView;// 接上一段代码里的mPromptView
+    if (hintView != null) {
+        // 构建一个纵向的LinearLayout
+        LinearLayout hintContainer = new LinearLayout(context);
+        hintContainer.setOrientation(LinearLayout.VERTICAL);
   
-          LinearLayout.LayoutParams hintParams = new LinearLayout.LayoutParams(
-                  ViewGroup.LayoutParams.MATCH_PARENT, 0, 1.0f
-          );
-  
-          switch (mPromptPosition) {
-          case POSITION_PROMPT_BELOW:
-              // dropDownView是用于显示候选词的ListView
-              hintContainer.addView(dropDownView, hintParams);
-              hintContainer.addView(hintView);// 在这里被add进LinearLayout
-              break;
-          // ...省略部分代码...
-          }
-      }
-  	// ...省略部分代码...
-  }
+        LinearLayout.LayoutParams hintParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, 0, 1.0);
+        switch (mPromptPosition) {
+        case POSITION_PROMPT_BELOW:
+            // dropDownView是用于显示候选词的ListView
+            hintContainer.addView(dropDownView, hintParams);
+            hintContainer.addView(hintView);// 在这里被add进LinearLayout
+            break;
+        // ...省略部分代码...
+        }
+    }
+    // ...省略部分代码...
+}
   ```
 
 #### 2  completionThreshold若设置的数字小于1，则还是设置为1。何以见得？
@@ -172,19 +170,19 @@ ArrayAdapter中用到的**R.array.names**, 暂且按下不表。先来看一下A
 
 ```java
  /**
-   * <p>Specifies the minimum number of characters the user has to type in the
-   * edit box before the drop down list is shown.</p>
-   *
-   * <p>When <code>threshold</code> is less than or equals 0, a threshold of
-   * 1 is applied.</p>
-   *
-   * @param threshold the number of characters to type before the drop down
-   *                  is shown
-   *
-   * @see #getThreshold()
-   *
-   * @attr ref android.R.styleable#AutoCompleteTextView_completionThreshold
-   */
+  * <p>Specifies the minimum number of characters the user has to type in the
+  * edit box before the drop down list is shown.</p>
+  *
+  * <p>When <code>threshold</code> is less than or equals 0, a threshold of
+  * 1 is applied.</p>
+  *
+  * @param threshold the number of characters to type before the drop down
+  *                  is shown
+  *
+  * @see #getThreshold()
+  *
+  * @attr ref android.R.styleable#AutoCompleteTextView_completionThreshold
+  */
 public void setThreshold(int threshold) {
     if (threshold <= 0) {
     	threshold = 1;

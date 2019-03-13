@@ -4,11 +4,15 @@ import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
+import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.view.View;
 import android.widget.EditText;
@@ -22,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -86,6 +91,12 @@ public class LoginActivity extends BaseActivity implements OnItemClickListener, 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //设置状态栏文字颜色及图标为深色
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+        } else {
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        }
         setContentView(R.layout.activity_login);
 
         ButterKnife.bind(this);
@@ -218,8 +229,33 @@ public class LoginActivity extends BaseActivity implements OnItemClickListener, 
 
     @OnClick(R.id.tv_forget_pwd)
     public void forgetPwd(View v) {
-        showToast("忘记密码");
+        showToast("TODO 忘记密码");
     }
+
+    @OnClick(R.id.tv_sign_up)
+    public void signUp(View v) {
+        showToast("TODO 注册");
+    }
+
+    private boolean isPwdVisible = false;
+
+    @OnClick(R.id.iv_pwd_visibility)
+    void switchPwdVisibility() {
+        Drawable drawable = ContextCompat.getDrawable(this, R.drawable.ic_password_invisible);
+        Drawable wrappedDrawable = DrawableCompat.wrap(drawable).mutate();
+        if (isPwdVisible) {
+            mPasswordView.setTransformationMethod(PasswordTransformationMethod.getInstance());
+            int color = Color.parseColor("#C8CBCF");
+            DrawableCompat.setTint(wrappedDrawable, color);
+        } else {
+            mPasswordView.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+            int color = ContextCompat.getColor(this, R.color.colorAccent);
+            DrawableCompat.setTint(wrappedDrawable, color);
+        }
+        ivPwdVisibility.setImageDrawable(wrappedDrawable);
+        isPwdVisible = !isPwdVisible;
+    }
+
 
     @OnClick(R.id.act_account)
     public void showDropDown() {

@@ -81,7 +81,7 @@ public class AccountAdapter extends BaseAdapter implements SwipeLinearLayout.OnS
         Context context = parent.getContext();
         if (foregroundColorSpan == null) {
             foregroundColorSpan = new ForegroundColorSpan(ContextCompat.getColor(context
-                    , R.color.highlight_phone));
+                    , R.color.colorAccent));
         }
 
         final ViewHolder holder;

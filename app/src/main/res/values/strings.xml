@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">login</string>
+    <string name="app_name">登录例子</string>
 
     <!-- 登录页 -->
     <string name="prompt_email" translatable="false">请输入手机号</string>
@@ -12,8 +12,6 @@
     <string name="error_invalid_password" translatable="false">密码过短</string>
     <string name="phone_error_field_required" translatable="false">手机号不能为空</string>
     <string name="pwd_error_field_required" translatable="false">密码不能为空</string>
-    <string name="back_end_login_ensure">xxx后台登录验证</string>
-    <string name="login_pc">登录电脑版xxx</string>
     <string name="string_login">密码登录</string>
     <string name="logout">退出登录</string>
 

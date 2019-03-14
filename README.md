@@ -1,6 +1,6 @@
 # AutoCompleteTextView最佳实践
 
-写这篇文章主要是为了记录一次使用AutoCompleteTextView(以下简称ACTV)的踩坑过程，并复盘整个的解决流程。如果有心急的读者只想了解ACTV的基本使用方法可以直接参看——[《AutoCompleteTextView最简例子》](./simplest_sample/README.md)
+写这篇文章主要是为了记录一次使用AutoCompleteTextView(以下简称ACTV)的踩坑过程，并复盘整个的解决流程。如果有心急的读者只想了解ACTV的基本使用方法可以直接参看——[《AutoCompleteTextView最佳实践-最简例子篇》](./simplest_sample/README.md)
 
 ### 一、AutoCompleteTextView简介
 AutoCompleteTextView是一个可编辑的文本视图，可在用户键入时自动显示候选文本(以下简称ACTV)。候选文本列表显示在下拉菜单中，用户可以从中选择要替换编辑框内容的项目。
@@ -43,18 +43,13 @@ AutoCompleteTextView是一个可编辑的文本视图，可在用户键入时自
 *笔者声明: 以下内容均已去除公司业务相关的敏感信息，纯属用于技术研究探讨。*
 
 - 1 启动App打开登录页，默认加载最近一次登录的账号和密码
-
 - 2 点击手机号输入框时，弹出候选列表
-
 - 3 候选列表的高度为3条账号记录的高度
-
 - 4 候选列表必须在输入框的下方(**提前剧透, 此处有大坑**)
-
-- 5 点击候选列表的右边x图标，item左滑显示删除按钮，点击删除，则删除此条账号记录
-
-- 6 点击账号输入框右侧的x图标，清除账号输入框内容。党账号输入框无内容是不显示x图标；密码输入框同理
-
-- 7 密码输入框右侧有切换密码可见性的按钮
+- 5 输入手机号时，候选账号的手机号命中部分高亮显示
+- 6 点击候选列表的右边x图标，item左滑显示删除按钮，点击删除，则删除此条账号记录
+- 7 点击账号输入框右侧的x图标，清除账号输入框内容。党账号输入框无内容是不显示x图标；密码输入框同理
+- 8 密码输入框右侧有切换密码可见性的按钮
 
 *设计稿(已脱敏)*：
 
@@ -62,11 +57,192 @@ AutoCompleteTextView是一个可编辑的文本视图，可在用户键入时自
 
 ### 四、功能点实现
 
-*这块内容放在这里显得主次不分，故笔者将这块内容放在了[传送门](./doc/逐步实现.md)里。感兴趣的读者可以前往阅读。*
+上述的功能点很多，这里我们着重讲解一下ACTV使用相关的功能实现(即第1~4条功能点)。其他功能将放在其他文章中详细讲解。
 
-### 五、发现问题
+#### 1 启动App打开登录页，默认加载最近一次登录的账号和密码
 
-这里我们着重讲一讲ACTV在这个需求下遇到的坑点。
+从SharedPreference里取出来第一条账号，默认填充到手机号/密码的输入框里。(较简单，不赘述。)
+
+#### 2 点击手机号输入框时，弹出候选列表
+
+```Java
+// 为手机号输入框设置点击事件:当点击手机号输入框时，展示候选账号列表窗口
+mPhoneView.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View v) {
+        mPhoneView.showDropDown();
+    }
+});
+```
+
+#### 3 候选列表的高度为3条账号记录的高度
+
+前面介绍过ACTV有一个`android:dropDownHeight`属性，对应的Java方法是`autoCompleteTextView#setDropDownHeight(int height)`。但问题在于**一条账号记录的高度**不是一个精确的数值。这也难不倒我，直接测量一条item的高度就成了。
+
+那么问题来了，要获得itemHight首先要取得列表控件。如果你已经阅读过了[《AutoCompleteTextView最佳实践-最简例子篇》](./simplest_sample/README.md)的拓展阅读，你就会知道，ACTV的候选列表是一个窗口，具体的实现类是ListPopupWindow(以下简称LPW)。(没看的读者走一下[传送门](./simplest_sample/README.md#二、拓展阅读)再回来~)
+
+因此列表控件也在LPW里。通过阅读LPW的源码可以知道，这个列表控件就是DropDownListView，是ListView的子类。
+
+![image](https://user-images.githubusercontent.com/20558748/54340753-045e8f00-4673-11e9-8d85-5b965461ee75.png)
+
+你如果不信上图的红字的话，我们来看一下ACTV里的setAdapter中是不是调用了LPW的setAdapter。
+
+![ACTV#setAdapter](./art/where_is_listview_prev.png)
+
+那么问题来了，找到了这个类有什么用，你需要取到对应的实例对象才行，而我们现在手里只有ACTV对象。那么久让我们从ACTV出发。通过查看ACTV源码，我们发现LPW对象是ACTV一个私有属性。
+
+![查看LPW对象名字](./art/get_list_popup_window.png)
+
+那么我们反射走一趟，拿到LPW对象。
+
+```java
+/**
+ * 获取ACTV的ListPopupWindow对象
+ *
+ * @param textView AutoCompleteTextView
+ * @return ListPopupWindow对象
+ */
+private static ListPopupWindow getListPopupWindow(AutoCompleteTextView textView) {
+    try {
+        Class<?> aClass = textView.getClass();
+        Field field = null;
+        while (aClass != null) {
+            try {
+                field = aClass.getDeclaredField("mPopup");
+            } catch (NoSuchFieldException ignore) {
+            } finally {
+                aClass = aClass.getSuperclass();
+            }
+            if (field != null) break;
+        }
+        if (field == null) return null;
+        field.setAccessible(true);
+        return (ListPopupWindow) field.get(textView);
+    } catch (Exception e) {
+        return null;
+    }
+}
+```
+
+好了，现在我们有LPW对象了。如法炮制我们要拿到DropDownListView对象。通过查看ACTV源码，我们发现DropDownListView对象是LPW的一个私有属性。
+
+![获取DDLV实例](./art/get_drop_down_list_view.png)
+
+那么我们再通过反射，拿到DropDownListView对象。不过DropDownListView在Android源码里是被标注了@hide的，我们无法直接拿到这个类，不过我们向上转型成它的父类ListView即可。
+
+![DropDownListView源码](./art/ddlv_is_hide.png)
+
+```java
+/**
+ * 获取DropDownListView对象
+ *
+ * @param lpw ListPopupWindow
+ * @return DropDownListView对象
+ */
+private static ListView getDropDownListView(ListPopupWindow lpw) {
+    try {
+        Class<?> aClass = lpw.getClass();
+        Field field = aClass.getDeclaredField("mDropDownList");
+        field.setAccessible(true);
+        return (ListView) field.get(lpw);
+    } catch (NoSuchFieldException ignore) {
+    } catch (IllegalAccessException ignore) {
+    }
+    return null;
+}
+```
+
+现在ListView的对象实例也拿到了，那么要怎么获取ListView中一条item的高度呢？
+
+```java
+/**
+ * 获取ListView的一条item的高度
+ *
+ * @param listView DropDownListView
+ * @return 一条item的高度
+ */
+private static int getListViewItemHeight(ListView listView) {
+    ListAdapter listAdapter = listView.getAdapter(); //得到ListView 添加的适配器
+    if (listAdapter == null) return -1;
+    View itemView = listAdapter.getView(0, null, listView); //获取其中的一项
+    //进行这一项的测量，为什么加这一步，具体分析可以参考 https://www.jianshu.com/p/dbd6afb2c890
+    itemView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+    return itemView.getMeasuredHeight(); //item的高度
+}
+```
+
+这里我们就可以拿到一条item的高度了。不过在测量的时候还有一个小小的策略：
+
+- 当匹配到的账号数量小于3时，为ACTV的候选列表高度设置为WRAP_CONTENT。
+- 当匹配到的账号数量大于等于3时，为ACTV设置为3条账号记录的高度。即itemHeight*3。
+
+为什么这么做呢？因为强制设置成3条记录的高度的话，当只有1或2条记录时，底下会有一块空白出现，页面展示很不友好。
+
+因此这里应当对上面的getListViewItemHeight方法稍作修改：
+
+```java
+/**
+ * 获取ListView的一条item的高度
+ *
+ * @param listView DropDownListView
+ * @param maxCount 候选记录最多可显示的条数(现在定的是3,不知道以后会不会改)
+ * @return -2:WRAP_CONTENT; 其他值一条item的高度
+ */
+private static int getListViewItemHeight(ListView listView, int maxCount) {
+    ListAdapter listAdapter = listView.getAdapter(); //得到ListView 添加的适配器
+    if (listAdapter == null) return -1;
+    if (listAdapter.getCount() < maxCount) {
+        return ViewGroup.LayoutParams.WRAP_CONTENT;
+    } else {
+        View itemView = listAdapter.getView(0, null, listView); //获取其中的一项
+        //进行这一项的测量，为什么加这一步，具体分析可以参考 https://www.jianshu.com/p/dbd6afb2c890这篇文章
+        itemView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        return itemView.getMeasuredHeight(); //item的高度
+    }
+}
+```
+
+稍稍总结下上面的方法：
+
+- 通过ACTV反射获取LPW实例；
+
+- 通过LPW反射获取DropDownListView实例；
+
+- 通过DropDownListView测量一条item的高度(如果item数量小于3，则返回WRAP_CONTENT)
+
+那么综上所述，观察仔细的读者会发现这三个方法都是private的。是的，我们把这3个方法写在一个工具类里，然后我们还需要提供一个供外部调用的入口方法：
+
+```java
+/**
+ * 设置AutoCompleteTextView的候选列表高度
+ *
+ * @param textView AutoCompleteTextView
+ * @param maxCount 候选记录最多可显示的条数(现在定的是3,不知道以后会不会改)
+ */
+public static void setDropDownHeight(AutoCompleteTextView textView, int maxCount) {
+    // 反射获取ListPopupWindow实例
+    ListPopupWindow mPopup = getListPopupWindow(textView);
+    if (mPopup == null) return;
+    // 反射获取DropDownListView实例
+    ListView mDropDownList = getDropDownListView(mPopup);
+    if (mDropDownList == null) return;
+    // 获取高度(候选列表项数小于maxCount时返回WRAP_CONTENT)
+    int itemHeight = getListViewItemHeight(mDropDownList, maxCount);
+    if (itemHeight == ViewGroup.LayoutParams.WRAP_CONTENT) {
+        textView.setDropDownHeight(itemHeight);
+    } else {
+        textView.setDropDownHeight(itemHeight * maxCount);
+    }
+}
+```
+
+接着，我们把这个方法拿去给ACTV设置上，一运行。诶？怎么肥四呀？不管用啊？？？
+
+![咋肥四鸭!](./art/zafeisiya.jpg)
+
+![不起作用](./art/height_not_work.gif)
+
+
 
 #### 坑点一：ACTV无法确保候选列表出现在输入框的下方
 

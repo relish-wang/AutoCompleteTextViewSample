@@ -2,8 +2,6 @@ package wang.relish.textsample;
 
 import android.app.Application;
 
-import wang.relish.textsample.util.SPUtil;
-
 /**
  * @author Relish Wang
  * @since 2019/03/06

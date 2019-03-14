@@ -1,22 +1,3 @@
 <resources>
     <string name="app_name">登录例子</string>
-
-    <!-- 登录页 -->
-    <string name="prompt_email" translatable="false">请输入手机号</string>
-    <string name="prompt_password" translatable="false">请输入密码</string>
-    <string name="prompt_login" translatable="false">登录</string>
-    <string name="prompt_forget" translatable="false">忘记密码?</string>
-    <string name="prompt_sign_up" translatable="false">没有账号?点此免费申请</string>
-
-
-    <string name="error_invalid_password" translatable="false">密码过短</string>
-    <string name="phone_error_field_required" translatable="false">手机号不能为空</string>
-    <string name="pwd_error_field_required" translatable="false">密码不能为空</string>
-    <string name="string_login">密码登录</string>
-    <string name="logout">退出登录</string>
-    <string name="string_register">用户注册</string>
-    <string name="prompt_register">注册</string>
-    <string name="register_success">注册成功!</string>
-    <string name="some_mills_later_go_login">%s秒后跳转到登录页面</string>
-
 </resources>

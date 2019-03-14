@@ -1,4 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/ll_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,32 +10,33 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="82dp"
-        android:text="@string/string_login"
-        android:textColor="@color/title_text_color"
+        android:layout_marginTop="64dp"
+        android:text="密码登录"
+        android:textColor="#292F41"
         android:textSize="32sp"
         android:textStyle="bold" />
+    <!--android:layout_marginTop="82dp"-->
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="120dp"
+        android:layout_marginTop="48dp"
         android:orientation="horizontal">
-        <!--android:layout_marginTop="48dp"-->
-        <wang.relish.textsample.ui.widget.SCAutoCompleteTextView
+
+        <AutoCompleteTextView
             android:id="@+id/act_account"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@null"
             android:completionThreshold="1"
             android:dropDownVerticalOffset="2dp"
-            android:hint="@string/prompt_email"
+            android:hint="请输入手机号"
             android:imeOptions="actionNext"
             android:inputType="phone|number"
             android:maxLines="1"
             android:padding="8dp"
-            android:textColor="@color/title_text_color"
-            android:textColorHint="@color/hint_text_color"
+            android:textColor="#292F41"
+            android:textColorHint="#D2D5D8"
             android:textSize="16sp" />
 
 
@@ -61,7 +63,37 @@
         android:layout_marginTop="30dp"
         android:orientation="horizontal">
 
-        <include layout="@layout/include_input_password" />
+        <EditText
+            android:id="@+id/et_pwd"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@null"
+            android:hint="请输入密码"
+            android:imeOptions="actionSend"
+            android:inputType="textPassword"
+            android:maxLines="1"
+            android:padding="8dp"
+            android:textColor="#292F41"
+            android:textColorHint="#D2D5D8"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:id="@+id/iv_pwd_clear"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center_vertical"
+            android:padding="8dp"
+            android:src="@drawable/ic_clear"
+            android:visibility="invisible" />
+
+        <ImageView
+            android:id="@+id/iv_pwd_visibility"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_gravity="center_vertical"
+            android:padding="6dp"
+            tools:src="@drawable/ic_password_visible" />
 
     </LinearLayout>
 
@@ -75,24 +107,14 @@
         android:layout_height="wrap_content">
 
         <TextView
-            android:id="@+id/tv_sign_up"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="12dp"
-            android:text="@string/prompt_sign_up"
-            android:textColor="#666"
-            android:visibility="gone" />
-
-        <TextView
             android:id="@+id/tv_forget_pwd"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_marginTop="12dp"
-            android:text="@string/prompt_forget"
-            android:textColor="@color/forget_text_color" />
+            android:text="忘记密码?"
+            android:textColor="#545967" />
 
     </RelativeLayout>
 
@@ -104,9 +126,9 @@
         android:layout_marginTop="16dp"
         android:background="@drawable/shape_corners_bg_login"
         android:gravity="center"
-        android:text="@string/prompt_login"
-        android:textColor="@color/white"
-        android:textSize="@dimen/login_text_size" />
+        android:text="登录"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp" />
 
 </LinearLayout>
 

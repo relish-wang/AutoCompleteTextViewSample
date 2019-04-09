@@ -2,10 +2,12 @@ package wang.relish.textsample;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -29,7 +31,7 @@ public class LoginActivity extends AppCompatActivity {
     public static final String KEY_HISTORY_ACCOUNTS = "__accounts__";
 
     @BindView(R.id.act_account)
-    AutoCompleteTextView mPhoneView;
+    WXAutoCompleteTextView mPhoneView;
     @BindView(R.id.et_pwd)
     EditText mPasswordView;
     AccountAdapter mAdapter;
@@ -51,6 +53,19 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void initViews() {
+        mPhoneView.setOnShowWindowListener(new WXAutoCompleteTextView.OnShowWindowListener() {
+            @Override
+            public boolean beforeShow() {
+                if (mAdapter == null || mAdapter.getCount() == 0) return false;
+                ACTVHeightUtil.setDropDownHeight(mPhoneView, 3);
+//                mHeightNeeded = AutoCompleteHack.setListItemMaximum(mPhoneView, 3);
+//                Rect rect = getLocation(mPhoneView);
+//                float freeHeightInFact = mScreenHeight/*这个屏幕高度已经减去mKeyBoardHeight了*/ - rect.bottom - PixelUtil.toPixelFromDIP(2)/*android:dropDownVerticalOffset="2dp"*/;
+//                if (freeHeightInFact >= mHeightNeeded - 15) return true;// 误差大概在10.75左右
+//                animatorFromY2Y(mOldY, -(mHeightNeeded - freeHeightInFact));
+                return true;
+            }
+        });
     }
 
     private void initData() {
@@ -86,8 +101,6 @@ public class LoginActivity extends AppCompatActivity {
         final String password = user.password;
         mPasswordView.setText(password);
         mPasswordView.setSelection(password == null ? 0 : password.length());
-        ACTVHeightUtil.setDropDownHeight(mPhoneView, 3);
-
     }
 
     /**

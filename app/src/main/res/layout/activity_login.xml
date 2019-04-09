@@ -23,7 +23,7 @@
         android:layout_marginTop="48dp"
         android:orientation="horizontal">
 
-        <AutoCompleteTextView
+        <wang.relish.textsample.WXAutoCompleteTextView
             android:id="@+id/act_account"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

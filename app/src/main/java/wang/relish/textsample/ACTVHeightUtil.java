@@ -17,27 +17,27 @@ import java.lang.reflect.Field;
  */
 public class ACTVHeightUtil {
 
-/**
- * 设置AutoCompleteTextView的候选列表高度
- *
- * @param textView AutoCompleteTextView
- * @param maxCount 候选记录最多可显示的条数(现在定的是3,不知道以后会不会改)
- */
-public static void setDropDownHeight(AutoCompleteTextView textView, int maxCount) {
-    // 反射获取ListPopupWindow实例
-    ListPopupWindow mPopup = getListPopupWindow(textView);
-    if (mPopup == null) return;
-    // 反射获取DropDownListView实例
-    ListView mDropDownList = getDropDownListView(mPopup);
-    if (mDropDownList == null) return;
-    // 获取高度(候选列表项数小于maxCount时返回WRAP_CONTENT)
-    int itemHeight = getListViewItemHeight(mDropDownList, maxCount);
-    if (itemHeight == ViewGroup.LayoutParams.WRAP_CONTENT) {
-        textView.setDropDownHeight(itemHeight);
-    } else {
-        textView.setDropDownHeight(itemHeight * maxCount);
+    /**
+     * 设置AutoCompleteTextView的候选列表高度
+     *
+     * @param textView AutoCompleteTextView
+     * @param maxCount 候选记录最多可显示的条数(现在定的是3,不知道以后会不会改)
+     */
+    public static void setDropDownHeight(AutoCompleteTextView textView, int maxCount) {
+        // 反射获取ListPopupWindow实例
+        ListPopupWindow mPopup = getListPopupWindow(textView);
+        if (mPopup == null) return;
+        // 反射获取DropDownListView实例
+        ListView mDropDownList = getDropDownListView(mPopup);
+        if (mDropDownList == null) return;
+        // 获取高度(候选列表项数小于maxCount时返回WRAP_CONTENT)
+        int itemHeight = getListViewItemHeight(mDropDownList, maxCount);
+        if (itemHeight == ViewGroup.LayoutParams.WRAP_CONTENT) {
+            textView.setDropDownHeight(itemHeight);
+        } else {
+            textView.setDropDownHeight(itemHeight * maxCount);
+        }
     }
-}
 
     /**
      * 获取ACTV的ListPopupWindow对象

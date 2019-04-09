@@ -238,9 +238,58 @@ public static void setDropDownHeight(AutoCompleteTextView textView, int maxCount
 
 接着，我们把这个方法拿去给ACTV设置上，一运行。诶？怎么肥四呀？不管用啊？？？
 
-![咋肥四鸭!](./art/zafeisiya.jpg)
+
 
 ![不起作用](./art/height_not_work.gif)
+
+![咋肥四鸭!](./art/zafeisiya.jpg)
+
+查看源码分析问题:
+
+ACTV的showDropDown方法：
+
+```java
+/**
+ * <p>Displays the drop down on screen.</p>
+ */
+public void showDropDown() {
+    // ...省略部分代码...
+    mPopup.show();
+    // ...省略部分代码...
+}
+```
+
+我们再进入mPopup的show方法中:
+
+```java
+/**
+ * Show the popup list. If the list is already showing, this method
+ * will recalculate the popup's size and position.
+ */
+@Override
+public void show() {
+    int height = buildDropDown();// 1 在show的时候会动态计算高度
+    // ...省略部分代码...
+    if (mPopup.isShowing()) {
+    // ...省略部分代码...
+    } else {
+        final int heightSpec;
+        if (mDropDownHeight == ViewGroup.LayoutParams.MATCH_PARENT) {
+            heightSpec = ViewGroup.LayoutParams.MATCH_PARENT;
+        } else {
+            if (mDropDownHeight == ViewGroup.LayoutParams.WRAP_CONTENT) {
+                heightSpec = height;
+            } else {
+                heightSpec = mDropDownHeight;
+            }
+        }
+        mPopup.setWidth(widthSpec);
+        mPopup.setHeight(heightSpec); // 2 并设置为mPopup的高度
+    }
+}
+```
+
+由上述两段代码可知，ACTV的候选框的高度是show的是动态计算的，因为我们提前设置高度没有任何意义。那么我把要将设置高度的这件事放在show方法的计算高度之后。
 
 
 
@@ -249,6 +298,8 @@ public static void setDropDownHeight(AutoCompleteTextView textView, int maxCount
 当输入框底部距离屏幕底部的距离不足以放下**3条候选账号记录的高度+软键盘的高度**时(也可能是1条或2条候选账号记录)，候选账号列表窗口会显示到输入框的上方。这种情况在小屏手机上容易出现；也可以通过下调手机号输入框在屏幕上的位置来复现。
 
 ![高度冲突](./art/actv_conflict.png)
+
+
 
 
 

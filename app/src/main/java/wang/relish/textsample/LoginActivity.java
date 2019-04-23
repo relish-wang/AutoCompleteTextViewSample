@@ -2,12 +2,9 @@ package wang.relish.textsample;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -53,18 +50,10 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        mPhoneView.setOnShowWindowListener(new WXAutoCompleteTextView.OnShowWindowListener() {
-            @Override
-            public boolean beforeShow() {
-                if (mAdapter == null || mAdapter.getCount() == 0) return false;
-                ACTVHeightUtil.setDropDownHeight(mPhoneView, 3);
-//                mHeightNeeded = AutoCompleteHack.setListItemMaximum(mPhoneView, 3);
-//                Rect rect = getLocation(mPhoneView);
-//                float freeHeightInFact = mScreenHeight/*这个屏幕高度已经减去mKeyBoardHeight了*/ - rect.bottom - PixelUtil.toPixelFromDIP(2)/*android:dropDownVerticalOffset="2dp"*/;
-//                if (freeHeightInFact >= mHeightNeeded - 15) return true;// 误差大概在10.75左右
-//                animatorFromY2Y(mOldY, -(mHeightNeeded - freeHeightInFact));
-                return true;
-            }
+        mPhoneView.setOnShowWindowListener(() -> {
+            if (mAdapter == null || mAdapter.getCount() == 0) return false;
+//            ACTVHeightUtil.setDropDownHeight(mPhoneView, 3);
+            return true;
         });
     }
 
@@ -86,8 +75,8 @@ public class LoginActivity extends AppCompatActivity {
             // 点击了某条候选账号，自动填充手机号和密码
             final String phone = user.phone;
             final String password = user.password;
-            mPhoneView.setText(phone);
-            mPhoneView.setSelection(phone == null ? 0 : phone.length());
+//            mPhoneView.setText(phone);
+//            mPhoneView.setSelection(phone == null ? 0 : phone.length());
             mPasswordView.setText(password);
             mPasswordView.setSelection(password == null ? 0 : password.length());
             mPhoneView.dismissDropDown();
@@ -96,8 +85,8 @@ public class LoginActivity extends AppCompatActivity {
         final SPUtil.User user = users.get(users.size() - 1);
         if (user == null) return;
         final String loginName = user.phone;
-        mPhoneView.setText(loginName);
-        mPhoneView.setSelection(loginName == null ? 0 : loginName.length());
+//        mPhoneView.setText(loginName);
+//        mPhoneView.setSelection(loginName == null ? 0 : loginName.length());
         final String password = user.password;
         mPasswordView.setText(password);
         mPasswordView.setSelection(password == null ? 0 : password.length());

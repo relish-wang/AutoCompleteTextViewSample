@@ -28,16 +28,14 @@ public class ACTVHeightUtil {
         ListPopupWindow mPopup = getListPopupWindow(textView);
         if (mPopup == null) return;
         // 反射获取DropDownListView实例
-        ListView mDropDownList = mPopup.getListView();
+        ListView mDropDownList = getDropDownListView(mPopup);
         if (mDropDownList == null) return;
         // 获取高度(候选列表项数小于maxCount时返回WRAP_CONTENT)
         int itemHeight = getListViewItemHeight(mDropDownList, maxCount);
         if (itemHeight == ViewGroup.LayoutParams.WRAP_CONTENT) {
-            mPopup.setHeight(itemHeight);
-//            textView.setDropDownHeight(itemHeight);
+            textView.setDropDownHeight(itemHeight);
         } else {
-            mPopup.setHeight(itemHeight * maxCount);
-//            textView.setDropDownHeight(itemHeight * maxCount);
+            textView.setDropDownHeight(itemHeight * maxCount);
         }
     }
 

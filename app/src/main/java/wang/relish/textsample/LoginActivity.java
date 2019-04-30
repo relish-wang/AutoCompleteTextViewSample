@@ -2,8 +2,9 @@ package wang.relish.textsample;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
+import android.widget.ACTVHeightUtil;
 import android.widget.EditText;
 
 import com.google.gson.Gson;
@@ -15,7 +16,6 @@ import java.util.List;
 import androidx.appcompat.app.AppCompatActivity;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 /**
  * 登录页
@@ -52,9 +52,14 @@ public class LoginActivity extends AppCompatActivity {
     private void initViews() {
         mPhoneView.setOnShowWindowListener(() -> {
             if (mAdapter == null || mAdapter.getCount() == 0) return false;
-//            ACTVHeightUtil.setDropDownHeight(mPhoneView, 3);
+            boolean b = ACTVHeightUtil.setDropDownHeight(mPhoneView, 3);
+            Log.d("setDropDownHeight", "setOnShowWindowListener#setDropDownHeight: " + b);
+
             return true;
         });
+        boolean b = ACTVHeightUtil.setDropDownHeight(mPhoneView, 3);
+        Log.d("setDropDownHeight", "initViews#setDropDownHeight: " + b);
+//        mPhoneView.setDropDownHeight(600);
     }
 
     private void initData() {
@@ -90,18 +95,6 @@ public class LoginActivity extends AppCompatActivity {
         final String password = user.password;
         mPasswordView.setText(password);
         mPasswordView.setSelection(password == null ? 0 : password.length());
-    }
-
-    /**
-     * 点击手机号输入框，显示候选账号列表
-     */
-    @OnClick(R.id.act_account)
-    public void showDropDown() {
-        if (TextUtils.isEmpty(mPhoneView.getText().toString())) {
-            if (mAdapter != null && mAdapter.getCount() > 0) {
-                mPhoneView.showDropDown();
-            }
-        }
     }
 
     /**

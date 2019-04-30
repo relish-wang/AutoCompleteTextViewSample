@@ -244,9 +244,123 @@ public static void setDropDownHeight(AutoCompleteTextView textView, int maxCount
 
 ![咋肥四鸭!](./art/zafeisiya.jpg)
 
-查看源码分析问题:
+看到这个现象我们要结合源码分析问题，并理解**触发ACTV展示候选列表**的实现原理。
 
-ACTV的showDropDown方法：
+### 五、触发ACTV展示候选列表的实现原理
+
+首先我们想到ACTV是在输入框的内容文字改变的时候回触发候选列表展示。由于ACTV继承自EditText，我们就想到了这个功能一定是配合TextWatcher实现的。接下来我们来寻找这个`TextWatcher`。
+
+ACTV有多个构造方法，所有的构造方法，最终都调用了参数最多的构造方法。果不其然，我们在这里找到它为自己设置了一个`TextWatcher`。
+
+**ACTV的构造方法**:
+
+```java
+public AutoCompleteTextView(Context context, AttributeSet attrs, int defStyleAttr,
+        int defStyleRes, Theme popupTheme) {
+    super(context, attrs, defStyleAttr, defStyleRes);
+    // ...省略部分代码...
+    // 添加输入框内容文字变化的监听器
+    addTextChangedListener(new MyWatcher());
+    // ...省略部分代码...
+}
+```
+
+**MyTextWatcher**:
+
+```java
+// MyTextWatcher是ACTV的一个私有内部类
+private class MyWatcher implements TextWatcher {
+    public void afterTextChanged(Editable s) {
+        doAfterTextChanged();// 调用了ACTV的doAfterTextChanged方法
+    }
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        doBeforeTextChanged();
+    }
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+    }
+}
+
+void doAfterTextChanged() {
+    // ...省略部分代码...
+    // 判断是否可以展示候选列表(前文提过ACTV有一个completionThreshold属性, 设置的数字的值代表，达到多少个字符就展示候选列表)
+    if (enoughToFilter()) { 
+        if (mFilter != null) {
+            mPopupCanBeUpdated = true;
+            performFiltering(getText(), mLastKeyCode); // 进入这个方法中继续查看
+        }
+    } else {
+       // ...省略部分代码...
+    }
+}
+```
+
+根据前面贴出的部分源码可知，代码流程走入了`MyTextWatcher`里的`afterTextChanged`,`afterTextChanged`又调用了ACTV的`performFiltering`方法。
+
+**ACTV#performFiltering:**
+
+```java
+protected void performFiltering(CharSequence text, int keyCode) {
+    // 这里的第二个参数(this)传入的其实是一个FilterListener。
+    // （ACTV实现了FilterListener的onFilterComplete方法）
+    mFilter.filter(text, this);
+}
+```
+
+`performFiltering`里直接调用了`mFilter`的`filter`方法。我们来找一下mFilter这个对象是从哪里来的。
+
+纵观整个ACTV的源码我们发现`mFilter`只有一处被赋值的地方，就在ACTV的`setAdapter`方法里:
+
+**ACTV#setAdapter**:
+
+```java
+public <T extends ListAdapter & Filterable> void setAdapter(T adapter) {
+    // ...省略部分代码...
+    if (mAdapter != null) {
+        mFilter = ((Filterable) mAdapter).getFilter();// 获取Adapter中的Filter对象
+        // ...省略部分代码...
+    } else {
+        mFilter = null;
+    }
+		// ...省略部分代码...
+}
+```
+
+由上面贴出的源码节选可知，`mFilter`来自于我们外部为ACTV设置的适配器中。此处Filter的实现暂且按下不表。我们看一下前文提到调用了`mFilter`的`filter`方法。
+
+**Filter#filter**
+
+这里源码就不贴了, 过于深究源码细节会影响我们解决问题的整体思路。直接说结论，总之，调用了`Filter`的`filter`方法之后， 最终调用了`Filter`的`performFiltering`。
+
+**Filter#performFiltering**
+
+这个方法实现的代码前文没贴，不过没关系，笔者来说明。这个方法是用来根据ACTV输入框里的关键字来过滤出需要展示候选数据的List。`performFiltering`中就是实现具体的过滤规则(比如匹配一下用户的手机号，姓名等)。
+
+**Filter#publishResults**
+
+最后`performFiltering`返回的过滤结果传入`publishResults`。`publishResults`就负责将数据展示出来就行了(设置数据源，调用Adapter的`notifiyDataSetChanged`)。
+
+**ACTV#onFilterComplete**:——(ACTV实现`FilterListener#publishResults`)
+
+在`publishResults`之后就会调用后`FilterListener#onFilterComplete`, 这个监听器在ACTV中有实现：
+
+```java
+public void onFilterComplete(int count) {
+    updateDropDownForFilter(count);// 调用下方的方法
+}
+
+private void updateDropDownForFilter(int count) {
+  	// ...省略部分代码...
+  	// （展示数据数量大于0 或 候选窗口总是展示）且 输入文字足够触发过滤器
+    if ((count > 0 || dropDownAlwaysVisible) && enoughToFilter) {
+        if (hasFocus() && hasWindowFocus() && mPopupCanBeUpdated) {
+            showDropDown(); // 展示候选窗口
+        }
+    } 
+  	// ...省略部分代码...
+}
+```
+
+**ACTV#showDropDown**：
 
 ```java
 /**
@@ -259,7 +373,7 @@ public void showDropDown() {
 }
 ```
 
-我们再进入mPopup的show方法中:
+**mPopup#show**:
 
 ```java
 /**
@@ -289,7 +403,7 @@ public void show() {
 }
 ```
 
-由上述两段代码可知，ACTV的候选框的高度是show的是动态计算的，因为我们提前设置高度没有任何意义。那么我把要将设置高度的这件事放在show方法的计算高度之后。
+由上述两段代码可知，ACTV的候选框的高度是show的是动态计算的，所以我们提前设置高度没有任何意义。那么我把要将设置高度的这件事放在show方法的计算高度之后。<-前面是瞎扯，最终原因是由于mDropDownList为null导致的。
 
 
 

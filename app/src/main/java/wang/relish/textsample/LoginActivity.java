@@ -4,7 +4,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ACTVHeightUtil;
 import android.widget.EditText;
 
 import com.google.gson.Gson;
@@ -51,15 +50,10 @@ public class LoginActivity extends AppCompatActivity {
 
     private void initViews() {
         mPhoneView.setOnShowWindowListener(() -> {
-            if (mAdapter == null || mAdapter.getCount() == 0) return false;
+            if (mAdapter == null || mAdapter.getCount() == 0) return;
             boolean b = ACTVHeightUtil.setDropDownHeight(mPhoneView, 3);
             Log.d("setDropDownHeight", "setOnShowWindowListener#setDropDownHeight: " + b);
-
-            return true;
         });
-        boolean b = ACTVHeightUtil.setDropDownHeight(mPhoneView, 3);
-        Log.d("setDropDownHeight", "initViews#setDropDownHeight: " + b);
-//        mPhoneView.setDropDownHeight(600);
     }
 
     private void initData() {

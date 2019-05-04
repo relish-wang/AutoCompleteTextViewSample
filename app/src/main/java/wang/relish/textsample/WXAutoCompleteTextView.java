@@ -25,12 +25,9 @@ public class WXAutoCompleteTextView extends AppCompatAutoCompleteTextView {
 
     @Override
     public void showDropDown() {
-        if (mListener == null) {
-            super.showDropDown();
-            return;
-        }
-        if (mListener.beforeShow()) {
-            super.showDropDown();
+        super.showDropDown();
+        if (mListener != null) {
+            mListener.afterShow();
         }
     }
 
@@ -42,6 +39,6 @@ public class WXAutoCompleteTextView extends AppCompatAutoCompleteTextView {
     }
 
     public interface OnShowWindowListener {
-        boolean beforeShow();
+        void afterShow();
     }
 }

@@ -1,4 +1,4 @@
-package android.widget;
+package wang.relish.textsample;
 
 import android.util.Log;
 import android.view.View;

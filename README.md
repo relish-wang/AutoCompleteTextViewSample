@@ -315,26 +315,76 @@ mPhoneView.setOnShowWindowListener(() -> {
 
 #### 3 候选列表必须在输入框的下方
 
-这不就是在下面吗 何出此言？因为我测试用的手机都是大屏手机，手机号输入框下方哪怕除去软键盘的高度，剩下的空间还够放三条数据的高度。但是在部分小屏手机上会出现候选框在上方的情况。(要在大屏手机上复现这种情况也比较简单，将手机号输入框的位置调整到屏幕偏下方的位置)
+这不就是在下面吗 何出此言？因为我测试用的手机都是大屏手机，手机号输入框下方哪怕除去软键盘的高度，剩下的空间还够放三条数据的高度。但是在部分小屏手机上会出现候选框在上方的情况。(要在大屏手机上复现这种情况也比较简单，将手机号输入框的位置调整到屏幕偏下方的位置)。
 
+![候选窗口在上方](./art/popupwindow_above.gif)
 
+![这可咋整啊!](./art/zhekezazhenga.jpg)
 
+别慌，先分析一下问题：
 
+- 1 为什么候选列表到上面去了？
 
+- 2 什么情况下它会到下面去？
 
+- 3 如何达成它展示下面的条件？
 
+##### 1 为什么候选列表到上面去了？
 
-
-
-#### 坑点一：ACTV无法确保候选列表出现在输入框的下方
-
-当输入框底部距离屏幕底部的距离不足以放下**3条候选账号记录的高度+软键盘的高度**时(也可能是1条或2条候选账号记录)，候选账号列表窗口会显示到输入框的上方。这种情况在小屏手机上容易出现；也可以通过下调手机号输入框在屏幕上的位置来复现。
+当输入框底部距离屏幕底部的距离不足以放下**3条候选账号记录的高度+软键盘的高度**时(也可能是1条或2条候选账号记录)，候选账号列表窗口会显示到输入框的上方。*这种情况在小屏手机上容易出现；也可以通过下调手机号输入框在屏幕上的位置来复现。*
 
 ![actv_conflict](./art/actv_conflict.png)
 
+这次不看源码，我们看看源码上的注释。我们从ACTV的`showDropDown`方法开始找，找到`mPopup.show()`这行代码(`mPopup`是一个`ListPopupWindow`)，再在`ListPopupWindow`的`show`方法里看到`mPopup.showAsDropDown(getAnchorView(), mDropDownHorizontalOffset,mDropDownVerticalOffset, mDropDownGravity);`, 最终找到的是`PopupWindow`的`showAsDropDown`方法。看到这里我们来看一下`PopupWindow`的`showAsDropDown`方法上的注释:
+```java
+/**
+ * Displays the content view in a popup window anchored to the corner of
+ * another view. The window is positioned according to the specified
+ * gravity and offset by the specified x and y coordinates.
+ * <p>
+ * If there is not enough room on screen to show the popup in its entirety,
+ * this method tries to find a parent scroll view to scroll. If no parent
+ * view can be scrolled, the specified vertical gravity will be ignored and
+ * the popup will anchor itself such that it is visible.
+ * <p>
+ * If the view later scrolls to move <code>anchor</code> to a different
+ * location, the popup will be moved correspondingly.
+ *
+ * @param anchor the view on which to pin the popup window
+ * @param xoff A horizontal offset from the anchor in pixels
+ * @param yoff A vertical offset from the anchor in pixels
+ * @param gravity Alignment of the popup relative to the anchor
+ *
+ * @see #dismiss()
+ */
+public void showAsDropDown(View anchor, int xoff, int yoff, int gravity) {
+		// ...省略部分代码...
+}
+```
+
+我们主要看注释里的第二段，大致意思是:**如果屏幕上没有足够的空间来显示整个弹出窗口，此方法会试图查找可滚动的父布局。 如果没有可滚动的父布局，则指定的垂直定位属性将会被忽略，那么弹出窗口将锚定自身以使其可见。** 简而言之，就是说**当PopupWindow指定的位置显示不下时，它会自适应位置显示**。
+
+感觉源码注释后，一下把三个问题都解答了。
+
+##### 2 什么情况下它会到下面去？
+
+下面的空间够它显示时。
+
+##### 3 如何达成它展示下面的条件？
+
+这个情况解法不唯一。我这里就说一种我想到的办法: **利用Scroller将布局推上去，使得输入框下方的空间足够展示候选列表窗口。**
+
+既然选定了一个方案，那么我们就来实行这个方案。稍稍整理一下思路，可以想到需要考虑如下几个问题：**当键盘升起/消失的时候需要Scroller推动布局。(升起的时候往上推，消失的时候往下推或者说复原)；需要测量推动的距离(键盘高度+3行候选列表高度-输入框下方当前的高度)。**再将问题更加具体化: 我们需要**监听键盘的打开与消失**，并**测量键盘高度**，**输入框距离屏幕底部的高度**。
+
+笔者尝试了很多**监听键盘事件**的方法，效果都不尽人意，最终我选择了facebook的reactnative中监听键盘事件的方法，并将它的关键代码抽出来自用。
+
+
+
+
+
 ### 最后的最后
 
-虽然这是一个很小的需求。但里面蕴含的知识点可不少哟。感兴趣的读者可以参看
+虽然这是一个很小的需求，但里面蕴含的知识点可不少哟。感兴趣的读者可以参看
 
 - [《AutoCompleteTextView最佳实践-最简例子篇》](./simplest_sample/README.md)
 - 《AutoCompleteTextView最佳实践-布局优化篇》

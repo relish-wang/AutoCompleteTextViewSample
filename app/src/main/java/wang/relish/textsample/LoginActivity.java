@@ -15,6 +15,7 @@ import java.util.List;
 import androidx.appcompat.app.AppCompatActivity;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * 登录页
@@ -103,4 +104,8 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    @OnClick(R.id.btn_login)
+    public void test(){
+        TestActivity.start(this);
+    }
 }

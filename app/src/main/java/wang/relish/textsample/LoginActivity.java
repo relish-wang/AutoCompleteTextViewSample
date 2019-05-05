@@ -74,8 +74,8 @@ public class LoginActivity extends AppCompatActivity {
             // 点击了某条候选账号，自动填充手机号和密码
             final String phone = user.phone;
             final String password = user.password;
-//            mPhoneView.setText(phone);
-//            mPhoneView.setSelection(phone == null ? 0 : phone.length());
+            mPhoneView.setText(phone);
+            mPhoneView.setSelection(phone == null ? 0 : phone.length());
             mPasswordView.setText(password);
             mPasswordView.setSelection(password == null ? 0 : password.length());
             mPhoneView.dismissDropDown();

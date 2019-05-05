@@ -43,13 +43,12 @@ AutoCompleteTextView是一个可编辑的文本视图，可在用户键入时自
 *笔者声明: 以下内容均已去除公司业务相关的敏感信息，纯属用于技术研究探讨。*
 
 - 1 启动App打开登录页，默认加载最近一次登录的账号和密码
-- 2 点击手机号输入框时，弹出候选列表
-- 3 候选列表的高度为3条账号记录的高度
-- 4 候选列表必须在输入框的下方(**提前剧透, 此处有大坑**)
-- 5 输入手机号时，候选账号的手机号命中部分高亮显示
-- 6 点击候选列表的右边x图标，item左滑显示删除按钮，点击删除，则删除此条账号记录
-- 7 点击账号输入框右侧的x图标，清除账号输入框内容。党账号输入框无内容是不显示x图标；密码输入框同理
-- 8 密码输入框右侧有切换密码可见性的按钮
+- 2 候选列表的高度为3条账号记录的高度
+- 3 候选列表必须在输入框的下方(**提前剧透, 此处有大坑**)
+- 4 输入手机号时，候选账号的手机号命中部分**高亮显示**
+- 5 点击候选列表的右边x图标，item左滑显示删除按钮，点击删除，则删除此条账号记录
+- 6 点击账号输入框右侧的x图标，清除账号输入框内容。党账号输入框无内容是不显示x图标；密码输入框同理
+- 7 密码输入框右侧有切换密码可见性的按钮
 
 *设计稿(已脱敏)*：
 
@@ -63,19 +62,7 @@ AutoCompleteTextView是一个可编辑的文本视图，可在用户键入时自
 
 从SharedPreference里取出来第一条账号，默认填充到手机号/密码的输入框里。(较简单，不赘述。)
 
-#### 2 点击手机号输入框时，弹出候选列表
-
-```Java
-// 为手机号输入框设置点击事件:当点击手机号输入框时，展示候选账号列表窗口
-mPhoneView.setOnClickListener(new View.OnClickListener() {
-    @Override
-    public void onClick(View v) {
-        mPhoneView.showDropDown();
-    }
-});
-```
-
-#### 3 候选列表的高度为3条账号记录的高度
+#### 2 候选列表的高度为3条账号记录的高度
 
 前面介绍过ACTV有一个`android:dropDownHeight`属性，对应的Java方法是`autoCompleteTextView#setDropDownHeight(int height)`。但问题在于**一条账号记录的高度**不是一个精确的数值。这也难不倒我，直接测量一条item的高度就成了。
 
@@ -236,9 +223,14 @@ public static void setDropDownHeight(AutoCompleteTextView textView, int maxCount
 }
 ```
 
+*工具类完整代码: [ACTVHeightUtil.java](./app/src/main/java/wang/relish/textsample/ACTVHeightUtil.java)*
+
 接着，我们把这个方法拿去给ACTV设置上，一运行。诶？怎么肥四呀？不管用啊？？？
 
-
+```java
+AutoCompleteTextView mPhoneView = findViewById(R.id.act_account);
+ACTVHeightUtil.setDropDownHeight(mPhoneView, 3)
+```
 
 ![不起作用](./art/height_not_work.gif)
 
@@ -286,7 +278,49 @@ public void show() {
 }
 ```
 
-兜了这么一大圈。我们知道了`mDropDownList`是在ACTV展示候选列表的时候才创建的。所以我们应该在ACTV的`showDropDown`中`mPopup.show();`之后再进行`setDropDownHeight`。
+兜了这么一大圈。我们知道了`mDropDownList`是在ACTV展示候选列表的时候才创建的。所以我们应该**在ACTV的`showDropDown`中`mPopup.show()`之后再进行`setDropDownHeight`**。有了思路，实际操作就简单了。ACTV的`showDropDown`方法是`public`的，因此我们可以自定义一个继承自ACTV的View，重写`showDropDown`方法:
+
+```java
+public class WXAutoCompleteTextView extends AppCompatAutoCompleteTextView {
+   // ...省略部分代码(构造方法)...
+    @Override
+    public void showDropDown() {
+        super.showDropDown();
+        if (mListener != null) {
+            mListener.afterShow();// 监听showDropDown方法执行之后的时机
+        }
+    }
+    private OnShowWindowListener mListener;
+    public interface OnShowWindowListener {
+        void afterShow();
+    }
+}
+```
+
+在`LoginActivity`中使用:
+
+```java
+AutoCompleteTextView mPhoneView = findViewById(R.id.act_account);
+mPhoneView.setOnShowWindowListener(() -> {
+    if (mAdapter == null || mAdapter.getCount() == 0) return;
+    ACTVHeightUtil.setDropDownHeight(mPhoneView, 3);
+});
+```
+
+*完整的`LoginActivity`代码: [LoginActivity.java](./app/src/main/java/wang/relish/textsample/LoginActivity.java)*
+
+再次运行起来，看一下效果:
+
+![不起作用](./art/height_works.gif)
+
+#### 3 候选列表必须在输入框的下方
+
+这不就是在下面吗 何出此言？因为我测试用的手机都是大屏手机，手机号输入框下方哪怕除去软键盘的高度，剩下的空间还够放三条数据的高度。但是在部分小屏手机上会出现候选框在上方的情况。(要在大屏手机上复现这种情况也比较简单，将手机号输入框的位置调整到屏幕偏下方的位置)
+
+
+
+
+
 
 
 
@@ -296,16 +330,12 @@ public void show() {
 
 当输入框底部距离屏幕底部的距离不足以放下**3条候选账号记录的高度+软键盘的高度**时(也可能是1条或2条候选账号记录)，候选账号列表窗口会显示到输入框的上方。这种情况在小屏手机上容易出现；也可以通过下调手机号输入框在屏幕上的位置来复现。
 
-![高度冲突](./art/actv_conflict.png)
-
-
-
-
+![actv_conflict](./art/actv_conflict.png)
 
 ### 最后的最后
 
 虽然这是一个很小的需求。但里面蕴含的知识点可不少哟。感兴趣的读者可以参看
 
-- 《AutoCompleteTextView最佳实践-最简例子篇》
+- [《AutoCompleteTextView最佳实践-最简例子篇》](./simplest_sample/README.md)
 - 《AutoCompleteTextView最佳实践-布局优化篇》
 - [《AutoCompleteTextView最佳实践-原理剖析篇》](./doc/AutoComleteTextView最佳实践-原理剖析篇.md)

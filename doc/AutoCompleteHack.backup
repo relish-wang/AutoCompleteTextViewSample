@@ -1,6 +1,10 @@
 package wang.relish.textsample;
 
+import android.content.Context;
+import android.graphics.Point;
+import android.view.Display;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.ListAdapter;
 import android.widget.ListPopupWindow;
@@ -14,21 +18,16 @@ import androidx.annotation.NonNull;
 
 /**
  * 动态修改AutoCompleteTextView的账号候选列表的高度
+ * 弃用, 设计师同意用自适应高度(即Android原生组件的显示策略)
  *
  * @author Relish Wang
  * @since 2018/12/11
  */
-public class ACTVHeightUtil {
+public class AutoCompleteHack {
 
-    /**
-     * 设置AutoCompleteTextView的候选列表高度
-     *
-     * @param textView AutoCompleteTextView
-     * @param maximum  候选记录最多可显示的条数(现在定的是3,不知道以后会不会改)
-     */
-    public static int setDropDownHeight(AutoCompleteTextView textView, int maximum) {
+    public static int setListItemMaximum(AutoCompleteTextView textView, int maximum) {
         try {
-            ListPopupWindow mPopup = getListPopupWindow(textView);
+            ListPopupWindow mPopup = getFieldValueByFieldName(textView);
             if (mPopup == null) return -1;
             int buildDropDown = buildDropDown(mPopup);
             int height = setListItemMaximum(maximum, mPopup);
@@ -48,6 +47,7 @@ public class ACTVHeightUtil {
         return -1;
     }
 
+
     // ListPopupWindow#buildDropDown():int
     private static int buildDropDown(@NonNull ListPopupWindow popup) {
         try {
@@ -65,15 +65,20 @@ public class ACTVHeightUtil {
         return -2;// -1 代表已存在；-2代表异常
     }
 
-    /**
-     * 获取ACTV的ListPopupWindow对象
-     *
-     * @param textView AutoCompleteTextView
-     * @return ListPopupWindow对象
-     */
-    private static ListPopupWindow getListPopupWindow(AutoCompleteTextView textView) {
+    private static int getScreenHeight(Context context) {
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        if (wm == null) return -1;
+
+        Display defaultDisplay = wm.getDefaultDisplay();
+        if (defaultDisplay == null) return -1;
+        Point point = new Point(0, 0);
+        defaultDisplay.getSize(point);
+        return point.y;
+    }
+
+    private static ListPopupWindow getFieldValueByFieldName(Object object) {
         try {
-            Class<?> aClass = textView.getClass();
+            Class<?> aClass = object.getClass();
             Field field = null;
             while (aClass != null) {
                 try {
@@ -86,7 +91,7 @@ public class ACTVHeightUtil {
             }
             if (field == null) return null;
             field.setAccessible(true);
-            return (ListPopupWindow) field.get(textView);
+            return (ListPopupWindow) field.get(object);
         } catch (Exception e) {
             return null;
         }

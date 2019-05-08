@@ -1,7 +1,12 @@
 package wang.relish.textsample;
 
+import android.animation.ObjectAnimator;
+import android.animation.TimeInterpolator;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Rect;
+import android.view.View;
+import android.view.animation.AccelerateInterpolator;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -16,16 +21,53 @@ import androidx.annotation.ArrayRes;
 import static wang.relish.textsample.LoginActivity.KEY_HISTORY_ACCOUNTS;
 
 /**
- * SharedPreference工具
- *
  * @author Relish Wang
- * @since 2019/03/06
+ * @since 2019/05/08
  */
-final class SPUtil {
+public final class Util {
 
-    private SPUtil() {
-        throw new UnsupportedOperationException("SPUtil can not be instantiated.");
+
+    private Util() {
+        throw new UnsupportedOperationException("Util can not be instantiated.");
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //                                   View尺寸相关                                              //
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * 获取View在屏幕上的位置
+     *
+     * @param v 当前View
+     */
+    public static Rect getLocation(View v) {
+        Rect rect = new Rect();
+        int[] location = new int[2];
+        v.getLocationOnScreen(location);
+        rect.left = location[0];
+        rect.top = location[1];
+
+        rect.right = rect.left + v.getMeasuredWidth();
+        rect.bottom = rect.top + v.getMeasuredHeight();
+
+        return rect;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //                                     动画相关                                                //
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    private static final TimeInterpolator DEFAULT_INTERPOLATOR = new AccelerateInterpolator();
+    public static ObjectAnimator objectAnimator(View view, String propertyName, float from, float to,
+                                                long duration, TimeInterpolator interpolator) {
+        final ObjectAnimator objectAnimator = ObjectAnimator
+                .ofFloat(view, propertyName, from, to)
+                .setDuration(duration);
+        objectAnimator.setInterpolator(interpolator == null ? DEFAULT_INTERPOLATOR : interpolator);
+        return objectAnimator;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //                               SharedPreferences相关                                         //
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private static volatile SharedPreferences sInstance;
 
@@ -40,7 +82,7 @@ final class SPUtil {
             users.add(0, new User("1351111222" + i, "123456", NameFactory.produceName(context)));
         }
         String newUserJson = new Gson().toJson(users);
-        SPUtil.putString(KEY_HISTORY_ACCOUNTS, newUserJson);
+        Util.putString(KEY_HISTORY_ACCOUNTS, newUserJson);
     }
 
 
@@ -84,7 +126,7 @@ final class SPUtil {
      * @return 已登录的账号信息
      */
     private static List<User> getAllAccounts() {
-        String usersJson = SPUtil.getString(KEY_HISTORY_ACCOUNTS, "[]");
+        String usersJson = Util.getString(KEY_HISTORY_ACCOUNTS, "[]");
         return new Gson().fromJson(usersJson, new TypeToken<List<User>>() {
         }.getType());
     }

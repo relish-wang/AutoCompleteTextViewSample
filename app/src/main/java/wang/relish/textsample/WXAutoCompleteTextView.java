@@ -2,6 +2,7 @@ package wang.relish.textsample;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import androidx.appcompat.widget.AppCompatAutoCompleteTextView;
 
@@ -25,9 +26,11 @@ public class WXAutoCompleteTextView extends AppCompatAutoCompleteTextView {
 
     @Override
     public void showDropDown() {
-        super.showDropDown();
         if (mListener != null) {
-            mListener.afterShow();
+            if (mListener.beforeShow()) {
+                Log.d(App.TAG, "显示候选列表!");
+                WXAutoCompleteTextView.super.showDropDown();
+            }
         }
     }
 
@@ -39,6 +42,7 @@ public class WXAutoCompleteTextView extends AppCompatAutoCompleteTextView {
     }
 
     public interface OnShowWindowListener {
-        void afterShow();
+        //        void afterShow();
+        boolean beforeShow();
     }
 }

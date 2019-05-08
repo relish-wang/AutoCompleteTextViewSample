@@ -30,13 +30,13 @@ import butterknife.ButterKnife;
  */
 class AccountAdapter extends BaseAdapter implements Filterable {
 
-    private List<SPUtil.User> mAccounts;
+    private List<Util.User> mAccounts;
 
-    private List<SPUtil.User> mOrigin;
+    private List<Util.User> mOrigin;
 
     private AccountAdapter.OnAccountChosenListener mListener;
 
-    public AccountAdapter(List<SPUtil.User> account, OnAccountChosenListener l) {
+    public AccountAdapter(List<Util.User> account, OnAccountChosenListener l) {
         mOrigin = account;
         this.mAccounts = account;
         mListener = l;
@@ -48,13 +48,13 @@ class AccountAdapter extends BaseAdapter implements Filterable {
     }
 
     @Override
-    public SPUtil.User getItem(int position) {
+    public Util.User getItem(int position) {
         return mAccounts == null ? null : mAccounts.size() <= position ? null : mAccounts.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        final SPUtil.User item = getItem(position);
+        final Util.User item = getItem(position);
         if (item == null) return 0;
         return item.phone.hashCode();
     }
@@ -77,7 +77,7 @@ class AccountAdapter extends BaseAdapter implements Filterable {
         } else {
             holder = (AccountAdapter.ViewHolder) convertView.getTag();
         }
-        final SPUtil.User item = getItem(position);
+        final Util.User item = getItem(position);
         if (item == null) return convertView;
         holder.tvName.setText(item.name);
         holder.tvPhone.setText(makeupHighlightText(item.phone));
@@ -103,9 +103,9 @@ class AccountAdapter extends BaseAdapter implements Filterable {
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
                 FilterResults results = new FilterResults();
-                List<SPUtil.User> newData = new ArrayList<>();
+                List<Util.User> newData = new ArrayList<>();
                 if (!TextUtils.isEmpty(constraint)) {
-                    for (SPUtil.User data : mOrigin) {
+                    for (Util.User data : mOrigin) {
                         final String loginName = data.phone;
                         if (!TextUtils.isEmpty(loginName) && loginName.contains(constraint)) {
                             newData.add(data);
@@ -122,7 +122,7 @@ class AccountAdapter extends BaseAdapter implements Filterable {
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
                 //noinspection unchecked
-                mAccounts = (List<SPUtil.User>) results.values;
+                mAccounts = (List<Util.User>) results.values;
                 mKeyword = (String) constraint;
                 notifyDataSetChanged();
             }
@@ -171,6 +171,6 @@ class AccountAdapter extends BaseAdapter implements Filterable {
      */
 
     public interface OnAccountChosenListener {
-        void onAccountChosen(SPUtil.User user);
+        void onAccountChosen(Util.User user);
     }
 }

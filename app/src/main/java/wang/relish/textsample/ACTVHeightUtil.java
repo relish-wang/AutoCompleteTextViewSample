@@ -24,27 +24,28 @@ public class ACTVHeightUtil {
      * @param textView AutoCompleteTextView
      * @param maxCount 候选记录最多可显示的条数(现在定的是3,不知道以后会不会改)
      */
-    public static boolean setDropDownHeight(AutoCompleteTextView textView, int maxCount) {
+    public static int setDropDownHeight(AutoCompleteTextView textView, int maxCount) {
         // 反射获取ListPopupWindow实例
         ListPopupWindow mPopup = getListPopupWindow(textView);
         if (mPopup == null) {
-            Log.d("setDropDownHeight","mPopup == null");
-            return false;
+            Log.d(App.TAG, "mPopup == null");
+            return -1;
         }
         // 反射获取DropDownListView实例
         ListView mDropDownList = getDropDownListView(mPopup);
         if (mDropDownList == null) {
-            Log.d("setDropDownHeight","mDropDownList == null");
-            return false;
+            Log.d(App.TAG, "mDropDownList == null");
+            return -1;
         }
         // 获取高度(候选列表项数小于maxCount时返回WRAP_CONTENT)
         int itemHeight = getListViewItemHeight(mDropDownList, maxCount);
         if (itemHeight == ViewGroup.LayoutParams.WRAP_CONTENT) {
             textView.setDropDownHeight(itemHeight);
+            return itemHeight * mDropDownList.getAdapter().getCount();
         } else {
             textView.setDropDownHeight(itemHeight * maxCount);
+            return itemHeight * maxCount;
         }
-        return true;
     }
 
     /**

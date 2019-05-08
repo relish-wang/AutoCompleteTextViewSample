@@ -1,7 +1,12 @@
 package wang.relish.textsample;
 
+import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -15,7 +20,8 @@ import java.util.List;
 import androidx.appcompat.app.AppCompatActivity;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
+import wang.relish.textsample.keyboard.GlobalLayoutListener;
+import wang.relish.textsample.keyboard.PixelUtil;
 
 /**
  * 登录页
@@ -27,6 +33,8 @@ public class LoginActivity extends AppCompatActivity {
 
     public static final String KEY_HISTORY_ACCOUNTS = "__accounts__";
 
+    @BindView(R.id.ll_root)
+    View rootView;
     @BindView(R.id.act_account)
     WXAutoCompleteTextView mPhoneView;
     @BindView(R.id.et_pwd)
@@ -50,16 +58,67 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        mPhoneView.setOnShowWindowListener(() -> {
-            if (mAdapter == null || mAdapter.getCount() == 0) return;
-            boolean b = ACTVHeightUtil.setDropDownHeight(mPhoneView, 3);
-            Log.d("setDropDownHeight", "setOnShowWindowListener#setDropDownHeight: " + b);
+        mPhoneView.setOnShowWindowListener(new WXAutoCompleteTextView.OnShowWindowListener() {
+
+            @Override
+            public boolean beforeShow() {
+                // 屏幕没空间了 或 键盘收起来了
+                if (Math.abs(mScreenHeight) < 0.1 || Math.abs(mKeyboardHeight) < 0.1) {
+                    return false; // 键盘收起且需要滑动的页面的的时候拒绝展示PopupWindow
+                }
+                // 没数据的时候 不显示
+                if (mAdapter == null || mAdapter.getCount() == 0) return false;
+                mHeightNeeded = ACTVHeightUtil.setDropDownHeight(mPhoneView, 3);
+                if (mHeightNeeded == -1) return true;
+                Log.d(App.TAG, "mHeightNeeded = " + mHeightNeeded);
+                Rect rect = Util.getLocation(mPhoneView);
+                float freeHeightInFact = mScreenHeight/*这个屏幕高度已经减去mKeyBoardHeight了*/ - rect.bottom - PixelUtil.toPixelFromDIP(10)/*android:dropDownVerticalOffset="2dp"*/;
+                Log.d(App.TAG, "freeHeightInFact = " + freeHeightInFact);
+                if (freeHeightInFact >= mHeightNeeded - 15) return true;// 误差大概在10.75左右, 不需要执行动画
+                animatorFromY2Y(-(mHeightNeeded - freeHeightInFact));// 300ms上移动画
+                return true;
+            }
         });
+        rootView.getViewTreeObserver().addOnGlobalLayoutListener(new GlobalLayoutListener(rootView,
+                (isShow, keyboardHeight, screenWidth, screenHeight) -> {
+                    if (isShow) {
+                        mKeyboardHeight = keyboardHeight;
+                        mScreenHeight = screenHeight;
+                    } else {
+                        mScreenHeight = 0;
+                    }
+                    Log.d(App.TAG, "mScreenHeight = " + mScreenHeight);
+                    mIsShow = isShow;
+                    mHandler.removeMessages(KEYBOARD_CHANGE);
+                    mHandler.sendEmptyMessageDelayed(KEYBOARD_CHANGE, 100);
+                }));
     }
 
+
+    public static final int KEYBOARD_CHANGE = 0xebad;
+    boolean mIsShow;
+
+    @SuppressLint("HandlerLeak")
+    Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            if (!mIsShow) {
+                // 用100ms隐藏弹窗, 用300ms做下滑动画, 再过50ms显示弹窗
+                if (mPhoneView.isPopupShowing()) {
+                    mPhoneView.dismissDropDown();
+                }
+                animatorFromY2Y(0);// 回归初始状态
+            } else {
+                if (mPhoneView.isFocused() && mAdapter != null && mAdapter.getCount() > 0) {
+                    mPhoneView.showDropDown();
+                }
+            }
+        }
+    };
+
     private void initData() {
-        final String cacheDataJson = SPUtil.getString(KEY_HISTORY_ACCOUNTS, "[]");
-        List<SPUtil.User> users = new Gson().fromJson(cacheDataJson, new TypeToken<List<SPUtil.User>>() {
+        final String cacheDataJson = Util.getString(KEY_HISTORY_ACCOUNTS, "[]");
+        List<Util.User> users = new Gson().fromJson(cacheDataJson, new TypeToken<List<Util.User>>() {
         }.getType());
         setViewWithInfo(users == null ? new ArrayList<>() : users);
     }
@@ -69,7 +128,7 @@ public class LoginActivity extends AppCompatActivity {
      *
      * @param users 账号信息
      */
-    private void setViewWithInfo(List<SPUtil.User> users) {
+    private void setViewWithInfo(List<Util.User> users) {
         if (users == null) return;
         mAdapter = new AccountAdapter(users, user -> {
             // 点击了某条候选账号，自动填充手机号和密码
@@ -82,7 +141,7 @@ public class LoginActivity extends AppCompatActivity {
             mPhoneView.dismissDropDown();
         });
         mPhoneView.setAdapter(mAdapter);
-        final SPUtil.User user = users.get(users.size() - 1);
+        final Util.User user = users.get(users.size() - 1);
         if (user == null) return;
         final String loginName = user.phone;
 //        mPhoneView.setText(loginName);
@@ -104,8 +163,26 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    @OnClick(R.id.btn_login)
-    public void test(){
-        TestActivity.start(this);
+    private float mKeyboardHeight;
+    private float mScreenHeight;// 屏幕可用高度
+    private float mHeightNeeded = -1;
+    /**
+     * 记录动画移动到的位置
+     */
+    private float mOldY = 0;
+
+    private void animatorFromY2Y(float newY) {
+        ObjectAnimator animator = Util.objectAnimator(
+                rootView,
+                "translationY",
+                mOldY,
+                newY,
+                0,
+                null);
+        animator.start();
+        Log.d(App.TAG, "执行动画: " + mOldY + "->" + newY);
+        mOldY = newY;
     }
+
 }
+

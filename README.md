@@ -372,11 +372,11 @@ public void showAsDropDown(View anchor, int xoff, int yoff, int gravity) {
 
 ##### 3 如何达成它展示下面的条件？
 
-这个情况解法不唯一。我这里就说一种我想到的办法: **利用Scroller将布局推上去，使得输入框下方的空间足够展示候选列表窗口。**
+这个情况解法不唯一。我这里就说一种我想到的办法: **利用属性动画将布局推上去，使得输入框下方的空间足够展示候选列表窗口。**
 
-既然选定了一个方案，那么我们就来实行这个方案。稍稍整理一下思路，可以想到需要考虑如下几个问题：**当键盘升起/消失的时候需要Scroller推动布局。(升起的时候往上推，消失的时候往下推或者说复原)；需要测量推动的距离(键盘高度+3行候选列表高度-输入框下方当前的高度)。**再将问题更加具体化: 我们需要**监听键盘的打开与消失**，并**测量键盘高度**，**输入框距离屏幕底部的高度**。
+既然选定了一个方案，那么我们就来实行这个方案。稍稍整理一下思路，可以想到需要考虑如下几个问题：**当键盘升起/消失的时候需要执行属性动画推动布局。(升起的时候往上推，消失的时候往下推或者说复原)；需要测量推动的距离(键盘高度+3行候选列表高度-输入框下方当前的高度)。**再将问题更加具体化: 我们需要**监听键盘的打开与消失**，并**测量键盘高度**，**输入框距离屏幕底部的高度**。
 
-笔者尝试了很多**监听键盘事件**的方法，效果都不尽人意，最终我选择了facebook的reactnative中监听键盘事件的方法，并将它的关键代码抽出来自用。
+笔者尝试了很多**监听键盘事件**的方法，效果都不尽人意，最终我选择了[facebook/react-native](https://github.com/facebook/react-native)中监听键盘事件的方法，并将它的关键代码抽出来自用。(键盘事件监听代码传送门->[relish-wang/KeyboardListener](https://github.com/relish-wang/KeyboardListener))
 
 
 
@@ -384,8 +384,8 @@ public void showAsDropDown(View anchor, int xoff, int yoff, int gravity) {
 
 ### 最后的最后
 
-虽然这是一个很小的需求，但里面蕴含的知识点可不少哟。感兴趣的读者可以参看
+虽然这是一个很小的需求，但里面蕴含的知识点可不少哟。感兴趣的读者可以参看其他系列文章
 
 - [《AutoCompleteTextView最佳实践-最简例子篇》](./simplest_sample/README.md)
-- 《AutoCompleteTextView最佳实践-布局优化篇》
 - [《AutoCompleteTextView最佳实践-原理剖析篇》](./doc/AutoComleteTextView最佳实践-原理剖析篇.md)
+- [《AutoCompleteTextView最佳实践-键盘事件篇》](https://github.com/relish-wang/KeyboardListener/README.md)

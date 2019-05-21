@@ -1,24 +1,30 @@
 # AutoCompleteTextView最佳实践-最简例子篇
 
+![][banner]
+
 笔者试图通过介绍一个AutoCompleteTextView的最简例子，来让读者直观地感受到这个控件实际展现效果，也较为容易地掌握它的基本使用方法。
+
+**关于作者**
+
+> 景三，程序员，主要从事Android平台基础架构方面的工作，欢迎交流技术方面的问题，可以去我的[Github](https://github.com/relish-wang)提issue或者发邮件至relish.wang@gmail.com与我交流。
 
 以下是效果展示:
 
-![最简例子效果展示](./art/simplest_sample.gif)
+![最简例子效果展示][simplest_sample]
 
 ### 一、关键代码拆解
 
 需要手动编辑的代码在三个文件里:
 
-- [MainActivity.java](./src/main/java/wang/relish/simplest/sample/MainActivity.java)
-- [activity_main.xml](./src/main/res/layout/activity_main.xml)
-- [arrays.xml](./src/main/res/values/arrays.xml)
+- [MainActivity.java][MainActivity_java]
+- [activity_main.xml][activity_main_xml]
+- [arrays.xml][arrays_xml]
 
 **核心代码**
 
 主要的Java代码在MainActivity，且核心代码只有3行代码。
 
-[MainActivity.java完整代码](./src/main/java/wang/relish/simplest/sample/MainActivity.java):
+[MainActivity.java完整代码][MainActivity_java]:
 
 ```java
 public class MainActivity extends AppCompatActivity {
@@ -41,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
 
 ArrayAdapter中用到的**R.array.names**, 暂且按下不表。先来看一下AutoCompleteTextView在布局文件中的使用。
 
-[activity_main.xml完整代码](./src/main/res/layout/activity_main.xml)
+[activity_main.xml完整代码][activity_main_xml]:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -91,7 +97,7 @@ ArrayAdapter中用到的**R.array.names**, 暂且按下不表。先来看一下A
 
 候选词的来源。实际开发过程中可能是本地搜索词的缓存，曾经登录过的账号或来自网络接口数据匹配。在最简例子里，我使用了一个字符串数组。在res/values/arrays.xml中添加字符串数组：
 
-[arrays.xml完整代码](./src/main/res/values/arrays.xml)
+[arrays.xml完整代码][arrays_xml]
 
 ```xml
 <resources>
@@ -191,3 +197,8 @@ public void setThreshold(int threshold) {
 }
 ```
 
+[banner]: ./art/banner.png
+[simplest_sample]: ./art/simplest_sample.gif
+[MainActivity_java]: ./src/main/java/wang/relish/simplest/sample/MainActivity.java
+[activity_main_xml]: ./src/main/res/layout/activity_main.xml
+[arrays_xml]: ./src/main/res/values/arrays.xml

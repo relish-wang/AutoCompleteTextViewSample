@@ -1,8 +1,8 @@
 # AutoCompleteTextView最佳实践
 
-![](./art/banner.png)
+![][banner]
 
-写这篇文章主要是为了记录一次使用AutoCompleteTextView(以下简称ACTV)的踩坑过程，并复盘整个的解决流程。如果有心急的读者只想了解ACTV的基本使用方法可以直接参看——[《AutoCompleteTextView最佳实践-最简例子篇》](./simplest_sample/README.md)
+写这篇文章主要是为了记录一次使用AutoCompleteTextView(以下简称ACTV)的踩坑过程，并复盘整个的解决流程。如果有心急的读者只想了解ACTV的基本使用方法可以直接参看——[《AutoCompleteTextView最佳实践-最简例子篇》][simplest_sample]
 
 **关于作者**
 
@@ -15,7 +15,7 @@ AutoCompleteTextView是一个可编辑的文本视图，可在用户键入时自
 
 由以下的继承树，可以知道ACTV是继承自EditText的，它拥有EditText的所有功能。EditText我们已经再熟悉不过了。ACTV除了继承自EditText，它还是实现了Filter.FilterListener接口。FilterListener接口是用于监听ACTV内容改变时匹配对应的候选词列表。接下来就介绍一下它独特的功能属性。
 
-![继承树](./art/autocompletetextview_extends_tree.png)
+![extends_tree][extends_tree]
 
 ## 二、AutoCompleteTextView的基本使用
 **AutoCompleteTextView常用属性**
@@ -32,21 +32,21 @@ AutoCompleteTextView是一个可编辑的文本视图，可在用户键入时自
 
 根据ACTV的源码可以知道，设置ACTV的Adapter需要继承ListAdapter且实现Filterable接口。因此可以使用ArrayAdapter。如果`ArrayAdapter`无法满足你的需求，则可以选择自定义Adapter。
 
-![setAdapter](./art/setAdapter.png)
+![setAdapter][set_adapter]
 
 因此ACTV设置了Adapter后就可以实现键入关键字显示候选词的效果了。
 
-**[最简例子](./simplest_sample/README.md)效果展示**
+**[最简例子][simplest_sample]效果展示**
 
 
 
-![AutoCompleteTextView最简例子展示效果](./simplest_sample/art/simplest_sample.gif)
+![AutoCompleteTextView最简例子展示效果][simplest_sample_show]
 
 ## 三、需求简介
 
 国际惯例先展示最终效果图：  
 
-![效果图](./art/main_funcation.gif)
+![效果图][main_show]
 
 *笔者声明: 以下内容均已去除公司业务相关的敏感信息，纯属用于技术研究探讨。*
 
@@ -60,7 +60,7 @@ AutoCompleteTextView是一个可编辑的文本视图，可在用户键入时自
 
 *设计稿(已脱敏)*：
 
-![登录页设计稿](./art/login_design_demo.png)
+![登录页设计稿][design_demo]
 
 ## 四、功能点实现
 
@@ -72,9 +72,9 @@ AutoCompleteTextView是一个可编辑的文本视图，可在用户键入时自
 
 ### 2 候选列表的高度为3条账号记录的高度
 
-前面介绍过ACTV有一个`android:dropDownHeight`属性，对应的Java方法是`autoCompleteTextView#setDropDownHeight(int height)`。但问题在于**一条账号记录的高度**不是一个精确的数值。这也难不倒我，直接测量一条item的高度就成了。
+前面介绍过ACTV有一个`android:dropDownHeight`属性，对应的Java方法是`autoCompleteTextView#setDropDownHeight(int height)`。虽然**一条账号记录的高度**不是一个精确的数值，不过直接测量一条item的高度就成了。
 
-那么问题来了，要获得itemHight首先要取得列表控件。如果你已经阅读过了[《AutoCompleteTextView最佳实践-最简例子篇》](./simplest_sample/README.md)的拓展阅读，你就会知道，ACTV的候选列表是一个窗口，具体的实现类是ListPopupWindow(以下简称LPW)。(没看的读者走一下[传送门](./simplest_sample/README.md#二、拓展阅读)再回来~)
+那么问题来了，要获得itemHight首先要取得列表控件。如果你已经阅读过了[《AutoCompleteTextView最佳实践-最简例子篇》][simplest_sample]的拓展阅读，你就会知道，ACTV的候选列表是一个窗口，具体的实现类是ListPopupWindow(以下简称LPW)。(没看的读者走一下[传送门][simplest_sample_extra]再回来~)
 
 因此列表控件也在LPW里。通过阅读LPW的源码可以知道，这个列表控件就是DropDownListView，是ListView的子类。
 
@@ -82,11 +82,11 @@ AutoCompleteTextView是一个可编辑的文本视图，可在用户键入时自
 
 你如果不信上图的红字的话，我们来看一下ACTV里的setAdapter中是不是调用了LPW的setAdapter。
 
-![ACTV#setAdapter](./art/where_is_listview_prev.png)
+![ACTV#setAdapter][where_is_listview]
 
 那么问题来了，找到了这个类有什么用，你需要取到对应的实例对象才行，而我们现在手里只有ACTV对象。那么久让我们从ACTV出发。通过查看ACTV源码，我们发现LPW对象是ACTV一个私有属性。
 
-![查看LPW对象名字](./art/get_list_popup_window.png)
+![查看LPW对象名字][get_window]
 
 那么我们反射走一趟，拿到LPW对象。
 
@@ -119,7 +119,7 @@ private static ListPopupWindow getListPopupWindow(AutoCompleteTextView textView)
 }
 ```
 
-![](./art/buildDropDown.png)
+![][build_drop_down]
 
 ```java
 /**
@@ -147,11 +147,11 @@ private static int buildDropDown(@NonNull ListPopupWindow popup) {
 
 好了，现在我们有LPW对象了。如法炮制我们要拿到DropDownListView对象。通过查看ACTV源码，我们发现DropDownListView对象是LPW的一个私有属性。
 
-![获取DDLV实例](./art/get_drop_down_list_view.png)
+![获取DDLV实例][ddlv]
 
 那么我们再通过反射，拿到DropDownListView对象。不过DropDownListView在Android源码里是被标注了@hide的，我们无法直接拿到这个类，不过我们向上转型成它的父类ListView即可。
 
-![DropDownListView源码](./art/ddlv_is_hide.png)
+![DropDownListView源码][ddlv_is_hide]
 
 ```java
 /**
@@ -238,7 +238,7 @@ public static int setDropDownHeight(AutoCompleteTextView textView, int maximum) 
 }
 ```
 
-*工具类完整代码: [ACTVHeightUtil.java](./app/src/main/java/wang/relish/textsample/ACTVHeightUtil.java)*
+*工具类完整代码: [ACTVHeightUtil.java][ACTVHeightUtil_java]*
 
 接着，我们把这个方法拿去给ACTV设置上，一运行。诶？怎么肥四呀？不管用啊？？？
 
@@ -247,9 +247,9 @@ AutoCompleteTextView mPhoneView = findViewById(R.id.act_account);
 ACTVHeightUtil.setDropDownHeight(mPhoneView, 3)
 ```
 
-![不起作用](./art/height_not_work.gif)
+![不起作用][height_not_work]
 
-![咋肥四鸭!](./art/zafeisiya.jpg)
+![咋肥四鸭!][zfsy]
 
 
 
@@ -257,7 +257,7 @@ ACTVHeightUtil.setDropDownHeight(mPhoneView, 3)
 
 **ListPopupWindow#buildDropDown**
 
-我们可以看到`mDropDownList`的实例化在`ListPopupWindow`中`buildDropDown`方法中。那么`buildDropDown`在哪里被调用呢？阅读过[《AutoCompleteTextView最佳实践-原理剖析篇》](./doc/AutoComleteTextView最佳实践-原理剖析篇.md)的读者会这道，`buildDropDown`是在`ListPopupWindow`的`show`方法中调用的。
+我们可以看到`mDropDownList`的实例化在`ListPopupWindow`中`buildDropDown`方法中。那么`buildDropDown`在哪里被调用呢？阅读过[《AutoCompleteTextView最佳实践-原理剖析篇》][principle_analysis]的读者会这道，`buildDropDown`是在`ListPopupWindow`的`show`方法中调用的。
 
 ```java
 private int buildDropDown() {
@@ -324,19 +324,19 @@ mPhoneView.setOnShowWindowListener(() -> {
 });
 ```
 
-*完整的`LoginActivity`代码: [LoginActivity.java](./app/src/main/java/wang/relish/textsample/LoginActivity.java)*
+*完整的`LoginActivity`代码: [LoginActivity.java][LoginActivity_java]*
 
 再次运行起来，看一下效果:
 
-![不起作用](./art/height_works.gif)
+![起作用][height_works]
 
 ### 3 候选列表必须在输入框的下方
 
 这不就是在下面吗 何出此言？因为我测试用的手机都是大屏手机，手机号输入框下方哪怕除去软键盘的高度，剩下的空间还够放三条数据的高度。但是在部分小屏手机上会出现候选框在上方的情况。(要在大屏手机上复现这种情况也比较简单，将手机号输入框的位置调整到屏幕偏下方的位置)。
 
-![候选窗口在上方](./art/popupwindow_above.gif)
+![候选窗口在上方][window_above]
 
-![这可咋整啊!](./art/zhekezazhenga.jpg)
+![这可咋整啊!][zkzz]
 
 别慌，先分析一下问题：
 
@@ -350,7 +350,7 @@ mPhoneView.setOnShowWindowListener(() -> {
 
 当输入框底部距离屏幕底部的距离不足以放下**3条候选账号记录的高度+软键盘的高度**时(也可能是1条或2条候选账号记录)，候选账号列表窗口会显示到输入框的上方。*这种情况在小屏手机上容易出现；也可以通过下调手机号输入框在屏幕上的位置来复现。*
 
-![actv_conflict](./art/actv_conflict.png)
+![actv_conflict][actv_conflict]
 
 这次不看源码，我们看看源码上的注释。我们从ACTV的`showDropDown`方法开始找，找到`mPopup.show()`这行代码(`mPopup`是一个`ListPopupWindow`)，再在`ListPopupWindow`的`show`方法里看到`mPopup.showAsDropDown(getAnchorView(), mDropDownHorizontalOffset,mDropDownVerticalOffset, mDropDownGravity);`, 最终找到的是`PopupWindow`的`showAsDropDown`方法。看到这里我们来看一下`PopupWindow`的`showAsDropDown`方法上的注释:
 ```java
@@ -397,7 +397,7 @@ public void showAsDropDown(View anchor, int xoff, int yoff, int gravity) {
 
 到这里我们的思路算是理清楚了:
 
-![](./art/touch_actv_flow.svg)
+![][touch_actv_flow]
 
 #### 滑动动画制作
 
@@ -410,7 +410,7 @@ public void showAsDropDown(View anchor, int xoff, int yoff, int gravity) {
 
 ##### 1 动画相关代码
 
-动画相关的代码我们写一个方法放在[Util.java](./app/src/main/java/wang/relish/textsample/Util.java)中，供后续使用:
+动画相关的代码我们写一个方法放在[Util.java][Util_java]中，供后续使用:
 
 ```java
 private static final TimeInterpolator DEFAULT_INTERPOLATOR = new AccelerateInterpolator();
@@ -494,13 +494,43 @@ private void animatorFromY2Y(float newY) {
 
 运行起来。完美！
 
-![](./art/final.gif)
+![][final]
 
-## 最后的最后
+## 五、最后的最后
 
-虽然这是一个很小的需求，但里面蕴含的知识点可不少哟。感兴趣的读者可以参看其他系列文章
+虽然这是一个很简单的需求，但里面蕴含了很多知(踩)识(坑)点。感兴趣的读者可以参看本系列的其他文章
 
-- [《AutoCompleteTextView最佳实践-最简例子篇》](./simplest_sample/README.md)
-- [《AutoCompleteTextView最佳实践-原理剖析篇》](./doc/AutoComleteTextView最佳实践-原理剖析篇.md)
-- [《AutoCompleteTextView最佳实践-键盘事件篇》](https://github.com/relish-wang/KeyboardListener/blob/master/README.md)
+- [《AutoCompleteTextView最佳实践-最简例子篇》][simplest_sample]
+- [《AutoCompleteTextView最佳实践-原理剖析篇》][principle_analysis]
+- [《AutoCompleteTextView最佳实践-键盘事件篇》][keyboard_event]
 - 《AutoCompleteTextView最佳实践-其他功能篇》(未完成)
+
+
+[simplest_sample]: ./simplest_sample/README.md
+[simplest_sample_extra]: ./simplest_sample/README.md#二、拓展阅读
+[simplest_sample_show]: ./simplest_sample/art/simplest_sample.gif
+[principle_analysis]: ./doc/AutoComleteTextView最佳实践-原理剖析篇.md
+[keyboard_event]: https://github.com/relish-wang/KeyboardListener/blob/master/README.md
+
+[ACTVHeightUtil_java]: ./app/src/main/java/wang/relish/textsample/ACTVHeightUtil.java
+[LoginActivity_java]: ./app/src/main/java/wang/relish/textsample/LoginActivity.java
+[Util_java]: ./app/src/main/java/wang/relish/textsample/Util.java
+
+[banner]: ./art/banner.png
+[extends_tree]: ./art/autocompletetextview_extends_tree.png
+[set_adapter]: ./art/setAdapter.png
+[main_show]: ./art/main_funcation.gif
+[design_demo]: ./art/login_design_demo.png
+[where_is_listview]: ./art/where_is_listview_prev.png
+[get_window]: ./art/get_list_popup_window.png
+[build_drop_down]: ./art/buildDropDown.png
+[ddlv]: ./art/get_drop_down_list_view.png
+[ddlv_is_hide]: ./art/ddlv_is_hide.png
+[height_not_work]: ./art/height_not_work.gif
+[zfsy]: ./art/zafeisiya.jpg
+[height_works]: ./art/height_works.gif
+[window_above]: ./art/popupwindow_above.gif
+[zkzz]: ./art/zhekezazhenga.jpg
+[actv_conflict]: ./art/actv_conflict.png
+[touch_actv_flow]: ./art/touch_actv_flow.svg
+[final]: ./art/final.gif

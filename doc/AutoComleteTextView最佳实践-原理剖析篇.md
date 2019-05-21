@@ -1,5 +1,14 @@
 # AutoComleteTextView最佳实践-原理剖析篇
 
+![banner][banner]
+
+本文着重讲解ACTV触发候选列表展示的代码总流程，深入了解Android的控件传递事件的机制。
+
+**关于作者**
+
+> 景三，程序员，主要从事Android平台基础架构方面的工作，欢迎交流技术方面的问题，可以去我的[Github](https://github.com/relish-wang)提issue或者发邮件至relish.wang@gmail.com与我交流。
+
+
 首先我们想到ACTV是在输入框的内容文字改变的时候回触发候选列表展示。由于ACTV继承自EditText，我们就想到了这个功能一定是配合TextWatcher实现的。接下来我们来寻找这个`TextWatcher`。
 
 ACTV有多个构造方法，所有的构造方法，最终都调用了参数最多的构造方法。果不其然，我们在这里找到它为自己设置了一个`TextWatcher`。
@@ -226,4 +235,6 @@ public void show() {
 
 - 5 最后通知ACTV数据过滤工作结束(onFilterComplete), ACTV在onFilterComplete中展示候选列表窗口。
 
-  
+
+
+[banner]: ./art/banner.png

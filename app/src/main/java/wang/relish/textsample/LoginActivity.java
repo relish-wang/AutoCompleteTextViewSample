@@ -1,7 +1,6 @@
 package wang.relish.textsample;
 
 import android.animation.ObjectAnimator;
-import android.annotation.SuppressLint;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,6 +13,7 @@ import android.widget.EditText;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,7 +57,10 @@ public class LoginActivity extends AppCompatActivity {
         initViews();
     }
 
+    private AnimHandler mHandler;
+
     private void initViews() {
+        mHandler = new AnimHandler(this);
         mPhoneView.setOnShowWindowListener(new WXAutoCompleteTextView.OnShowWindowListener() {
 
             @Override
@@ -70,6 +73,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (mAdapter == null || mAdapter.getCount() == 0) return false;
                 mHeightNeeded = ACTVHeightUtil.setDropDownHeight(mPhoneView, 3);
                 if (mHeightNeeded == -1) return true;
+
                 Log.d(App.TAG, "mHeightNeeded = " + mHeightNeeded);
                 Rect rect = Util.getLocation(mPhoneView);
                 float freeHeightInFact = mScreenHeight/*这个屏幕高度已经减去mKeyBoardHeight了*/ - rect.bottom - PixelUtil.toPixelFromDIP(10)/*android:dropDownVerticalOffset="2dp"*/;
@@ -82,39 +86,35 @@ public class LoginActivity extends AppCompatActivity {
         rootView.getViewTreeObserver().addOnGlobalLayoutListener(new GlobalLayoutListener(rootView,
                 (isShow, keyboardHeight, screenWidth, screenHeight) -> {
                     if (isShow) {
-                        mKeyboardHeight = keyboardHeight;
-                        mScreenHeight = screenHeight;
+                        mKeyboardHeight = keyboardHeight;// 当前键盘高度
+                        mScreenHeight = screenHeight;// 当前键盘可用高度
                     } else {
                         mScreenHeight = 0;
                     }
                     Log.d(App.TAG, "mScreenHeight = " + mScreenHeight);
                     mIsShow = isShow;
-                    mHandler.removeMessages(KEYBOARD_CHANGE);
-                    mHandler.sendEmptyMessageDelayed(KEYBOARD_CHANGE, 100);
+
+                    mHandler.removeMessages(AnimHandler.KEYBOARD_CHANGE);
+                    mHandler.sendEmptyMessageDelayed(AnimHandler.KEYBOARD_CHANGE, 100);
                 }));
     }
 
 
-    public static final int KEYBOARD_CHANGE = 0xebad;
-    boolean mIsShow;
+    private boolean mIsShow; // 键盘是否展示
 
-    @SuppressLint("HandlerLeak")
-    Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            if (!mIsShow) {
-                // 用100ms隐藏弹窗, 用300ms做下滑动画, 再过50ms显示弹窗
-                if (mPhoneView.isPopupShowing()) {
-                    mPhoneView.dismissDropDown();
-                }
-                animatorFromY2Y(0);// 回归初始状态
-            } else {
-                if (mPhoneView.isFocused() && mAdapter != null && mAdapter.getCount() > 0) {
-                    mPhoneView.showDropDown();
-                }
+    public void handleKeyboardEvent() {
+        if (!mIsShow) {
+            // 用100ms隐藏弹窗, 用300ms做下滑动画, 再过50ms显示弹窗
+            if (mPhoneView.isPopupShowing()) {
+                mPhoneView.dismissDropDown();
+            }
+            animatorFromY2Y(0);// 回归初始状态
+        } else {
+            if (mPhoneView.isFocused() && mAdapter != null && mAdapter.getCount() > 0) {
+                mPhoneView.showDropDown();
             }
         }
-    };
+    }
 
     private void initData() {
         final String cacheDataJson = Util.getString(KEY_HISTORY_ACCOUNTS, "[]");
@@ -147,8 +147,8 @@ public class LoginActivity extends AppCompatActivity {
 //        mPhoneView.setText(loginName);
 //        mPhoneView.setSelection(loginName == null ? 0 : loginName.length());
         final String password = user.password;
-        mPasswordView.setText(password);
-        mPasswordView.setSelection(password == null ? 0 : password.length());
+//        mPasswordView.setText(password);
+//        mPasswordView.setSelection(password == null ? 0 : password.length());
     }
 
     /**
@@ -186,3 +186,26 @@ public class LoginActivity extends AppCompatActivity {
 
 }
 
+final class AnimHandler extends Handler {
+
+    static final int KEYBOARD_CHANGE = 0xebad;
+
+    private final WeakReference<LoginActivity> aty;
+
+    AnimHandler(LoginActivity aty) {
+        this.aty = new WeakReference<LoginActivity>(aty);
+    }
+
+    @Override
+    public void handleMessage(Message msg) {
+        switch (msg.what) {
+            case KEYBOARD_CHANGE: {
+                LoginActivity activity = aty.get();
+                if (activity != null) {
+                    activity.handleKeyboardEvent();
+                }
+                break;
+            }
+        }
+    }
+}

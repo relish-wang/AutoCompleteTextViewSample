@@ -1,5 +1,7 @@
 # AutoCompleteTextView最佳实践
 
+![](./art/banner.png)
+
 写这篇文章主要是为了记录一次使用AutoCompleteTextView(以下简称ACTV)的踩坑过程，并复盘整个的解决流程。如果有心急的读者只想了解ACTV的基本使用方法可以直接参看——[《AutoCompleteTextView最佳实践-最简例子篇》](./simplest_sample/README.md)
 
 **关于作者**

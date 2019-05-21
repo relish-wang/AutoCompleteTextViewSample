@@ -24,31 +24,37 @@ public class ACTVHeightUtil {
      * 设置AutoCompleteTextView的候选列表高度
      *
      * @param textView AutoCompleteTextView
-     * @param maximum  候选记录最多可显示的条数(现在定的是3,不知道以后会不会改)
+     * @param maximum  候选记录最多可显示的条数(现在定的是3)
      */
     public static int setDropDownHeight(AutoCompleteTextView textView, int maximum) {
         try {
+            // 1 反射获取ListPopupWindow对象
             ListPopupWindow mPopup = getListPopupWindow(textView);
             if (mPopup == null) return -1;
+            // 2 反射调用buildDropDown方法获取列表高度
             int buildDropDown = buildDropDown(mPopup);
-            int height = setListItemMaximum(maximum, mPopup);
-            if (buildDropDown < 0 && height < 0) return -1;
-            int finalHeight;
-            if (buildDropDown < 0) {
-                finalHeight = height;
-            } else if (height < 0) {
-                finalHeight = buildDropDown;
-            } else {
-                finalHeight = height;//Math.min(height, buildDropDown);
-            }
-            textView.setDropDownHeight(finalHeight);
-            return maxHeight;
+            if (buildDropDown < 0) return -1;
+            // 3 反射获取DropDownListView对象(DropDownListView被标注了@hide, 故只好用其父类ListView接收[向上转型])
+            ListView mDropDownList = getDropDownListView(mPopup);
+            if (mDropDownList == null) return -1;
+            // 4 测量出一条item的高度
+            int itemHeight = getListViewItemHeight(mDropDownList);
+            // 5 关键代码: 列表总高度 和 单条Item高度*设定的Item数量 之间取最小值
+            int height = Math.min(buildDropDown, itemHeight * maximum);
+            textView.setDropDownHeight(height);
+            return height;
         } catch (Exception ignore) {
         }
         return -1;
     }
 
-    // ListPopupWindow#buildDropDown():int
+    /**
+     * 调用ListPopupWindow的buildDropDown()方法
+     * ListPopupWindow#buildDropDown():int
+     *
+     * @param popup ListPopupWindow
+     * @return 高度
+     */
     private static int buildDropDown(@NonNull ListPopupWindow popup) {
         try {
             Class<? extends ListPopupWindow> clazz = popup.getClass();
@@ -60,6 +66,7 @@ public class ACTVHeightUtil {
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
+            // 当被调用的方法的内部抛出了异常而没有被捕获时，将由此异常接收！！！
             e.printStackTrace();
         }
         return -2;// -1 代表已存在；-2代表异常
@@ -92,43 +99,35 @@ public class ACTVHeightUtil {
         }
     }
 
-    private static int setListItemMaximum(@SuppressWarnings("SameParameterValue") int maximum, ListPopupWindow object) {
+    /**
+     * 获取DropDownListView对象
+     *
+     * @param lpw ListPopupWindow
+     * @return DropDownListView对象
+     */
+    private static ListView getDropDownListView(ListPopupWindow lpw) {
         try {
-            Class<?> aClass = object.getClass();
+            Class<?> aClass = lpw.getClass();
             Field field = aClass.getDeclaredField("mDropDownList");
             field.setAccessible(true);
-            ListView dropDownListView = (ListView) field.get(object);
-            return setListViewHeight(dropDownListView, maximum);
-        } catch (Exception ignore) {
+            return (ListView) field.get(lpw);
+        } catch (NoSuchFieldException ignore) {
+        } catch (IllegalAccessException ignore) {
         }
-        return -1;
+        return null;
     }
 
-
-    private static int maxHeight = 0;
-
     /**
-     * 设置ListView的最大高度为{@param count}条数据的高度
+     * 获取ListView的一条item的高度
      *
-     * @param listView AutoCompleteTextView 的 mPopup(ListPopupWindow) 的 mDropDownList(DropDownListView是个ListView)
-     * @param count    item数量
+     * @param listView DropDownListView
+     * @return 一条item的高度
      */
-    private static int setListViewHeight(ListView listView, int count) {
-        int height = -1;
+    private static int getListViewItemHeight(ListView listView) {
         ListAdapter listAdapter = listView.getAdapter(); //得到ListView 添加的适配器
-        if (listAdapter == null) return height;
-
-        View itemView = listAdapter.getView(0, null, listView); //获取其中的一项
-        //进行这一项的测量，为什么加这一步，具体分析可以参考 https://www.jianshu.com/p/dbd6afb2c890这篇文章
-        itemView.measure(0, 0);
-        int itemHeight = itemView.getMeasuredHeight(); //一项的高度
-        maxHeight = itemHeight * count;
-        int itemCount = listAdapter.getCount();//得到总的项数
-        if (itemCount <= count) {
-            height = itemCount * itemHeight;
-        } else {
-            height = count * itemHeight;
-        }
-        return height;
+        if (listAdapter == null) return -1;
+        View itemView = listAdapter.getView(0, null, listView); // 获取其中的一项
+        itemView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED); // 进行这一项的测量
+        return itemView.getMeasuredHeight();
     }
 }

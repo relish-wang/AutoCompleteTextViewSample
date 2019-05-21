@@ -2,6 +2,8 @@
 
 写这篇文章主要是为了记录一次使用AutoCompleteTextView(以下简称ACTV)的踩坑过程，并复盘整个的解决流程。如果有心急的读者只想了解ACTV的基本使用方法可以直接参看——[《AutoCompleteTextView最佳实践-最简例子篇》](./simplest_sample/README.md)
 
+[TOC]
+
 ### 一、AutoCompleteTextView简介
 AutoCompleteTextView是一个可编辑的文本视图，可在用户键入时自动显示候选文本(以下简称ACTV)。候选文本列表显示在下拉菜单中，用户可以从中选择要替换编辑框内容的项目。
 
@@ -64,6 +66,8 @@ AutoCompleteTextView是一个可编辑的文本视图，可在用户键入时自
 
 #### 2 候选列表的高度为3条账号记录的高度
 
+// FIXME 修改实现
+
 前面介绍过ACTV有一个`android:dropDownHeight`属性，对应的Java方法是`autoCompleteTextView#setDropDownHeight(int height)`。但问题在于**一条账号记录的高度**不是一个精确的数值。这也难不倒我，直接测量一条item的高度就成了。
 
 那么问题来了，要获得itemHight首先要取得列表控件。如果你已经阅读过了[《AutoCompleteTextView最佳实践-最简例子篇》](./simplest_sample/README.md)的拓展阅读，你就会知道，ACTV的候选列表是一个窗口，具体的实现类是ListPopupWindow(以下简称LPW)。(没看的读者走一下[传送门](./simplest_sample/README.md#二、拓展阅读)再回来~)
@@ -111,6 +115,32 @@ private static ListPopupWindow getListPopupWindow(AutoCompleteTextView textView)
 }
 ```
 
+![](./art/buildDropDown.png)
+
+```java
+/**
+ * 反射调用ListPopupWindow的buildDropDown()方法, 获取列表总高度
+ *
+ * @param popup ListPopupWindow
+ * @return 高度
+ */
+private static int buildDropDown(@NonNull ListPopupWindow popup) {
+    try {
+        Class<? extends ListPopupWindow> clazz = popup.getClass();
+        Method buildDropDown = clazz.getDeclaredMethod("buildDropDown");
+        buildDropDown.setAccessible(true);
+        return (int) buildDropDown.invoke(popup);
+    } catch (NoSuchMethodException e) {
+        e.printStackTrace();
+    } catch (IllegalAccessException e) {
+        e.printStackTrace();
+    } catch (InvocationTargetException e) {
+        e.printStackTrace();
+    }
+    return -2;// -1 代表已存在；-2代表异常
+}
+```
+
 好了，现在我们有LPW对象了。如法炮制我们要拿到DropDownListView对象。通过查看ACTV源码，我们发现DropDownListView对象是LPW的一个私有属性。
 
 ![获取DDLV实例](./art/get_drop_down_list_view.png)
@@ -151,10 +181,9 @@ private static ListView getDropDownListView(ListPopupWindow lpw) {
 private static int getListViewItemHeight(ListView listView) {
     ListAdapter listAdapter = listView.getAdapter(); //得到ListView 添加的适配器
     if (listAdapter == null) return -1;
-    View itemView = listAdapter.getView(0, null, listView); //获取其中的一项
-    //进行这一项的测量，为什么加这一步，具体分析可以参考 https://www.jianshu.com/p/dbd6afb2c890
-    itemView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
-    return itemView.getMeasuredHeight(); //item的高度
+    View itemView = listAdapter.getView(0, null, listView); // 获取其中的一项
+    itemView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED); // 进行这一项的测量
+    return itemView.getMeasuredHeight();
 }
 ```
 
@@ -165,37 +194,13 @@ private static int getListViewItemHeight(ListView listView) {
 
 为什么这么做呢？因为强制设置成3条记录的高度的话，当只有1或2条记录时，底下会有一块空白出现，页面展示很不友好。
 
-因此这里应当对上面的getListViewItemHeight方法稍作修改：
+稍稍总结下上面提到的所有方法：
 
-```java
-/**
- * 获取ListView的一条item的高度
- *
- * @param listView DropDownListView
- * @param maxCount 候选记录最多可显示的条数(现在定的是3,不知道以后会不会改)
- * @return -2:WRAP_CONTENT; 其他值一条item的高度
- */
-private static int getListViewItemHeight(ListView listView, int maxCount) {
-    ListAdapter listAdapter = listView.getAdapter(); //得到ListView 添加的适配器
-    if (listAdapter == null) return -1;
-    if (listAdapter.getCount() < maxCount) {
-        return ViewGroup.LayoutParams.WRAP_CONTENT;
-    } else {
-        View itemView = listAdapter.getView(0, null, listView); //获取其中的一项
-        //进行这一项的测量，为什么加这一步，具体分析可以参考 https://www.jianshu.com/p/dbd6afb2c890这篇文章
-        itemView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-        return itemView.getMeasuredHeight(); //item的高度
-    }
-}
-```
-
-稍稍总结下上面的方法：
-
-- 通过ACTV反射获取LPW实例；
-
-- 通过LPW反射获取DropDownListView实例；
-
-- 通过DropDownListView测量一条item的高度(如果item数量小于3，则返回WRAP_CONTENT)
+- 1 通过ACTV反射获取**LPW对象**
+- 2 根据1中拿到的LPW对象反射调用buildDropDown方法获取**列表高度**
+- 3 通过LPW反射获取**DropDownListView对象**(DropDownListView被标注了@hide, 故只好用其父类ListView接收[向上转型])
+- 4 通过DropDownListView对象测量出**一条item的高度**
+- 5 **列表总高度** 和 **单条Item高度*设定的Item数量** 之间取最小值, 为ACTV设置高度
 
 那么综上所述，观察仔细的读者会发现这三个方法都是private的。是的，我们把这3个方法写在一个工具类里，然后我们还需要提供一个供外部调用的入口方法：
 
@@ -204,22 +209,28 @@ private static int getListViewItemHeight(ListView listView, int maxCount) {
  * 设置AutoCompleteTextView的候选列表高度
  *
  * @param textView AutoCompleteTextView
- * @param maxCount 候选记录最多可显示的条数(现在定的是3,不知道以后会不会改)
+ * @param maximum  候选记录最多可显示的条数(现在定的是3)
  */
-public static void setDropDownHeight(AutoCompleteTextView textView, int maxCount) {
-    // 反射获取ListPopupWindow实例
-    ListPopupWindow mPopup = getListPopupWindow(textView);
-    if (mPopup == null) return;
-    // 反射获取DropDownListView实例
-    ListView mDropDownList = getDropDownListView(mPopup);
-    if (mDropDownList == null) return;
-    // 获取高度(候选列表项数小于maxCount时返回WRAP_CONTENT)
-    int itemHeight = getListViewItemHeight(mDropDownList, maxCount);
-    if (itemHeight == ViewGroup.LayoutParams.WRAP_CONTENT) {
-        textView.setDropDownHeight(itemHeight);
-    } else {
-        textView.setDropDownHeight(itemHeight * maxCount);
+public static int setDropDownHeight(AutoCompleteTextView textView, int maximum) {
+    try {
+        // 1 反射获取ListPopupWindow对象
+        ListPopupWindow mPopup = getListPopupWindow(textView);
+        if (mPopup == null) return -1;
+        // 2 反射调用buildDropDown方法获取列表高度
+        int buildDropDown = buildDropDown(mPopup);
+        if (buildDropDown < 0) return -1;
+        // 3 反射获取DropDownListView对象(DropDownListView被标注了@hide, 故只好用其父类ListView接收[向上转型])
+        ListView mDropDownList = getDropDownListView(mPopup);
+        if (mDropDownList == null) return -1;
+        // 4 测量出一条item的高度
+        int itemHeight = getListViewItemHeight(mDropDownList);
+        // 5 关键代码: 列表总高度 和 单条Item高度*设定的Item数量 之间取最小值
+        int height = Math.min(buildDropDown, itemHeight * maximum);
+        textView.setDropDownHeight(height);
+        return height;
+    } catch (Exception ignore) {
     }
+    return -1;
 }
 ```
 
@@ -235,6 +246,8 @@ ACTVHeightUtil.setDropDownHeight(mPhoneView, 3)
 ![不起作用](./art/height_not_work.gif)
 
 ![咋肥四鸭!](./art/zafeisiya.jpg)
+
+
 
 通过调试发现，当我们调用的时候`getDropDownListView(mPopup);`取到的`mDropDownListView`为null。根据实际情况考虑我们也应该知道在View初始的时候, 我们并不知道我们会过滤出多少数据，应该这个ListView也未初始化，因此取到的是null。这就意味着我们应该在*恰当的时候*为`mDropDownListView`设定高度。那么问题来了，什么时候才是**恰当的时候**? 那么我们再来看一波源码，看一下`mDropDownListView`在何时被初始化。
 

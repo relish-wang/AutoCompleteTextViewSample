@@ -70,6 +70,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (mAdapter == null || mAdapter.getCount() == 0) return false;
                 mHeightNeeded = ACTVHeightUtil.setDropDownHeight(mPhoneView, 3);
                 if (mHeightNeeded == -1) return true;
+
                 Log.d(App.TAG, "mHeightNeeded = " + mHeightNeeded);
                 Rect rect = Util.getLocation(mPhoneView);
                 float freeHeightInFact = mScreenHeight/*这个屏幕高度已经减去mKeyBoardHeight了*/ - rect.bottom - PixelUtil.toPixelFromDIP(10)/*android:dropDownVerticalOffset="2dp"*/;

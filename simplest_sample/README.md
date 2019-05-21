@@ -1,4 +1,4 @@
-# AutoCompleteTextView最简例子
+# AutoCompleteTextView最佳实践-最简例子篇
 
 笔者试图通过介绍一个AutoCompleteTextView的最简例子，来让读者直观地感受到这个控件实际展现效果，也较为容易地掌握它的基本使用方法。
 

@@ -2,7 +2,16 @@
 
 ![banner][banner]
 
-本文着重讲解ACTV触发候选列表展示的代码总流程，深入了解Android的控件传递事件的机制。
+此系列文章记录了一次使用AutoCompleteTextView(以下简称ACTV)的踩坑过程，并复盘整个的解决流程。本文着重讲解ACTV触发候选列表展示的代码总流程，深入了解Android的控件传递事件的机制。
+
+以下是此系列所有文章
+
+- [《AutoCompleteTextView最佳实践-总集篇》][main]
+- [《AutoCompleteTextView最佳实践-最简例子篇》][simplest_sample]
+- [《AutoCompleteTextView最佳实践-原理剖析篇》][principle_analysis]
+- [《AutoCompleteTextView最佳实践-键盘事件篇》][keyboard_event]
+- 《AutoCompleteTextView最佳实践-其他功能篇》(未完成)
+
 
 **关于作者**
 
@@ -238,3 +247,8 @@ public void show() {
 
 
 [banner]: ./art/banner.png
+
+[main]: ../README.md
+[simplest_sample]: ../simplest_sample/README.md
+[principle_analysis]: ./AutoComleteTextView最佳实践-原理剖析篇.md
+[keyboard_event]: https://github.com/relish-wang/KeyboardListener/blob/master/README.md

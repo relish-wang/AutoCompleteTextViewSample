@@ -2,7 +2,17 @@
 
 ![][banner]
 
-写这篇文章主要是为了记录一次使用AutoCompleteTextView(以下简称ACTV)的踩坑过程，并复盘整个的解决流程。如果有心急的读者只想了解ACTV的基本使用方法可以直接参看——[《AutoCompleteTextView最佳实践-最简例子篇》][simplest_sample]
+
+此系列文章记录了一次使用AutoCompleteTextView(以下简称ACTV)的踩坑过程，并复盘整个的解决流程。
+
+以下是此系列所有文章
+
+- [《AutoCompleteTextView最佳实践-总集篇》][main]
+- [《AutoCompleteTextView最佳实践-最简例子篇》][simplest_sample]
+- [《AutoCompleteTextView最佳实践-原理剖析篇》][principle_analysis]
+- [《AutoCompleteTextView最佳实践-键盘事件篇》][keyboard_event]
+- 《AutoCompleteTextView最佳实践-其他功能篇》(未完成)
+
 
 **关于作者**
 
@@ -506,6 +516,7 @@ private void animatorFromY2Y(float newY) {
 - 《AutoCompleteTextView最佳实践-其他功能篇》(未完成)
 
 
+[main]: ./README.md
 [simplest_sample]: ./simplest_sample/README.md
 [simplest_sample_extra]: ./simplest_sample/README.md#二、拓展阅读
 [simplest_sample_show]: ./simplest_sample/art/simplest_sample.gif
